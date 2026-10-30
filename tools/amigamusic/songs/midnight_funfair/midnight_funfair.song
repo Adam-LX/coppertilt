@@ -1,0 +1,327 @@
+# Midnight Funfair – muzyka stołu (oryginalna kompozycja, clean-room).
+# Klasyczna Amiga: 4 kanały LRRL, 8-bit, ProTracker. Renderuj:
+#   python3 -m amigamusic render songs/midnight_funfair/midnight_funfair.song -o out/ --png
+title    Midnight Funfair
+author   CopperTilt (agent: Grok Bot)
+profile  pinball-table
+speed    6
+tempo    132
+channels 4
+pan      L R R L
+stereo   0.7
+filter   a500
+key      C major
+normalize -14
+
+[instruments]
+01 kick   kick
+02 snare  snare
+03 hat    hat_closed
+04 bass   pulse_bass vol=26
+05 lead   calliope vol=60
+06 arp    chip_square vol=40
+07 bell   bell
+08 crash  crash
+09 ohat   hat_open
+10 tom    tom
+11 lead2  detune_lead vol=52
+12 rim    rim
+13 orch   orch_hit
+
+[leadsheet]
+Tonacja C-dur, 132 BPM (speed 6 / tempo 132), 16 wierszy = 1 takt 4/4, wiersz = 1/16.
+Kanały: 1 perkusja | 2 bas „um-pa” (pryma+oktawa, kwinta+oktawa, ósemki) | 3 melodia | 4 „pa” akordy
+(arpeggio 0xy na 2. i 4. mierze) + odpowiedzi (call-and-response) w lukach melodii.
+
+MOTYW (hak, 4 takty, do zanucenia) – „wejście na karuzelę”: skok G4 -> C5 i rozłożony C-dur w górę,
+w 2. takcie zejście po Am, w 3. wspinaczka po F do A5, w 4. opadająca odpowiedź na G7 (półkadencja).
+  takt 1  C     G4 . . . C5 . E5 . G5 ~ ~ ~ ~ ~ E5 .
+  takt 2  Am    A5 ~ ~ ~ ~ ~ G5 . E5 . . . C5 . A4 .
+  takt 3  F     C5 . . . F5 . . . A5 ~ ~ ~ ~ ~ G5 .
+  takt 4  G7    G5 . . . F5 . E5 . D5 ~ ~ ~ ~ ~ [odp. kanał 4]
+Następnik: takt 5 = takt 1, takt 6 A7 (C#5 – „jarmarczna” dominanta wtrącona), takt 7 Dm|G7, takt 8 C (kadencja).
+
+FORMA (pętla 40 taktów = 72,7 s; intro 4 takty grane tylko raz):
+  INTRO  | C  | Am | F  | G7 |                      bas+„pa”, przejście perkusji, zapowiedź dzwonkiem
+  A      | C  | Am | F  | G7 | C | A7 | Dm,G7 | C |  motyw (kaliope)
+  A2     | C  | Am | F  | G7 | C | A7 | Dm,G7 | C |  motyw z wariacją (ozdobniki, wyższy takt 4), break
+  B      | F  | Fm | C  | A7 | Dm | G7 | C | G7 |   refren: dłuższe nuty, jaśniejszy lead (detune), Fm = „kolor nocy”
+  BRIDGE | Am | E7 | Am | E7 | F | C | Dm | G7 |    a-moll, dzwonek pytanie – kanał 4 odpowiedź, lżejsza perkusja
+  A'     | C  | Am | F  | G7 | C | A7 | Dm,G7 | C,G7 | powrót motywu, mocniejsza perkusja, zwrot G7 -> pętla
+Dynamika: intro p, A mf, A2 mf+, B f, bridge mp, A' f. Przejścia (fills) na końcu fraz: takty 8 i 16 każdej części.
+Multiball (osobna sekcja, speed 5 = 158 BPM, ta sama tonacja i motyw => płynne przejście):
+  MA | motyw A, galopujący bas, arpeggio akordów co wiersz (kanał 4), perkusja 16-tki
+  MB | refren B
+  MA'| motyw z uderzeniami orkiestry
+
+[track bt]
+C-3@kick*2 C-3@hat*2 C-3@snare*2 C-3@hat*2 C-3@kick*2 C-3@hat*2 C-3@snare*2 C-3@hat*2
+[track bt2]
+C-3@kick*2 C-3@hat*2 C-3@snare*2 C-3@hat*2 C-3@kick*2 C-3@kick*2 C-3@snare*2 C-3@ohat*2
+[track btc]
+C-3@crash*2 C-3@hat*2 C-3@snare*2 C-3@hat*2 C-3@kick*2 C-3@kick*2 C-3@snare*2 C-3@ohat*2
+[track fill]
+C-3@kick*2 C-3@hat*2 C-3@snare*2 C-3@hat*2 C-3v36@snare C-3v40 C-3v44 C-3v48 A-2@tom*2 C-3v52@snare C-3v60
+[track fill2]
+C-3@kick*2 C-3@hat*2 C-3@snare*2 F-2@tom*2 A-2@tom*2 C-3@tom*2 C-3v44@snare C-3v50 C-3v56 C-3v64
+[track btlite]
+C-3@kick*4 C-3@rim*4 C-3@kick*2 C-3@hat*2 C-3@rim*4
+[track btin]
+C-3@kick*4 C-3@hat*4 C-3@kick*4 C-3@hat*4
+
+# bas „um-pa”: pryma, oktawa, pryma, oktawa | kwinta w dół, oktawa ... (C; transponuj +N)
+[track oom]
+C-2@bass*2 C-3*2 C-2*2 C-3*2 G-1*2 G-2*2 G-1*2 G-2*2
+[track oh]
+C-2@bass*2 C-3*2 G-1*2 G-2*2
+[track oomwalk]
+G-1@bass*2 G-2*2 G-1*2 G-2*2 G-1*2 A-1*2 B-1*2 D-2*2
+
+# „pa” – akord arpeggio na 2. i 4. mierze. pM dur, pm moll, p7 dominanta (pryma, tercja, septyma)
+[track pM]
+.*4 C-2v20@arp!!047*3 ^ .*4 C-2v20@arp!!047*3 ^
+[track pm]
+.*4 C-2v20@arp!!037*3 ^ .*4 C-2v20@arp!!037*3 ^
+[track p7]
+.*4 C-2v20@arp!!04A*3 ^ .*4 C-2v20@arp!!04A*3 ^
+[track hm]
+.*4 C-2v20@arp!!037*3 ^
+[track hM]
+.*4 C-2v20@arp!!047*3 ^
+[track h7]
+.*4 C-2v20@arp!!04A*3 ^
+# „pa” + odpowiedź (16-tki w górę po akordzie w wierszach 12-15)
+[track rM]
+.*4 C-2v20@arp!!047*3 ^ .*4 G-2v28@arp C-3 E-3 G-3
+[track r7]
+.*4 C-2v20@arp!!04A*3 ^ .*4 A#2v28@arp G-2 E-2 C-2
+
+# ---- melodia: motyw A (takt po takcie)
+[track la1]
+G-2@lead*4 C-3*2 E-3*2 G-3*2 .!!423*4 E-3*2
+[track la2]
+A-3*2 .!!423*4 G-3*2 E-3*4 C-3*2 A-2*2
+[track la3]
+C-3*4 F-3*4 A-3*2 .!!423*4 G-3*2
+[track la4]
+G-3*4 F-3*2 E-3*2 D-3*2 .!!423*4 ^*2
+[track la6]
+A-3*2 .!!423*4 G-3*2 E-3*4 C#3*2 A-2*2
+[track la7]
+F-3*4 D-3*4 B-2*4 D-3*2 F-3*2
+[track la8]
+E-3*6 D-3*2 C-3*2 .!!423*4 ^*2
+# wariacje A2
+[track lv2]
+A-3*2 G-3*2 E-3*2 G-3*2 E-3*4 C-3*2 A-2*2
+[track lv3]
+C-3*2 D-3*2 F-3*2 G-3*2 A-3*2 .!!423*4 G-3*2
+[track lv4]
+B-3*4 G-3*2 A-3*2 G-3*2 F-3*2 D-3*2 ^*2
+[track lv8]
+C-3*4 G-2*4 C-3*4 ^*4
+[track lt8]
+C-3*4 G-2*4 B-2*4 D-3*4
+# refren B (lead2 = jaśniejszy, odstrojony)
+[track lb1]
+A-3@lead2*2 .!!424*6 F-3*4 A-3*4
+[track lb2]
+G#3*2 .!!424*6 F-3*4 C-3*4
+[track lb3]
+G-3*2 .!!424*10 E-3*4
+[track lb4]
+A-3*4 G-3*4 E-3*4 C#3*4
+[track lb5]
+D-3*4 F-3*4 A-3*2 .!!424*6
+[track lb6]
+G-3*4 F-3*4 D-3*4 B-2*4
+[track lb7]
+C-3*4 E-3*4 G-3*4 E-3*4
+[track lb8]
+D-3*2 .!!424*6 ^*8
+# bridge – dzwonek (pytanie), odpowiedź w kanale 4
+[track lr1]
+C-3@bell*4 E-3*4 A-3*8
+[track lr2]
+G#3*4 B-3*4 E-3*8
+[track lr3]
+A-3*4 E-3*4 C-3*8
+[track lr4]
+B-2*4 D-3*4 G#2*8
+[track lr5]
+A-2*4 C-3*4 F-3*8
+[track lr6]
+E-3*4 G-3*4 C-3*8
+[track lr7]
+F-3*4 A-3*4 D-3*8
+[track lr8]
+F-3*4 D-3*4 B-2*4 G-2*4
+# odpowiedzi kanału 4 w bridge (wiersze 8-15, opadające ósemki po akordzie)
+[track qa]
+.*4 A-1v20@arp!!037*3 ^ E-3v28@arp*2 C-3*2 A-2*2 E-2*2
+[track qe]
+.*4 E-2v20@arp!!04A*3 ^ D-3v28@arp*2 B-2*2 G#2*2 E-2*2
+[track qf]
+.*4 F-2v20@arp!!047*3 ^ C-3v28@arp*2 A-2*2 F-2*2 C-2*2
+[track qc]
+.*4 C-2v20@arp!!047*3 ^ G-2v28@arp*2 E-2*2 C-2*2 G-1*2
+[track qd]
+.*4 D-2v20@arp!!037*3 ^ A-2v28@arp*2 F-2*2 D-2*2 A-1*2
+[track qg]
+.*4 G-1v20@arp!!04A*3 ^ F-2v28@arp*2 D-2*2 B-1*2 G-1*2
+
+# ================================================================ wzory główne
+[pattern IN rows=64]
+chords: C Am F G7
+ch1: btin btin btin fill
+ch2: oom oom-3 oom-7 oom-5
+ch3: .*16 .*16 .*8 C-3@bell*4 A-2*4 D-3*8 B-2*4 G-2*4
+ch4: pM pm+9 pM+5 r7+7
+
+[pattern A1 rows=64]
+chords: C Am F G7
+ch1: btc bt bt bt2
+ch2: oom oom-3 oom-7 oom-5
+ch3: la1 la2 la3 la4
+ch4: pM pm+9 pM+5 r7+7
+
+[pattern A2 rows=64]
+chords: C A7 Dm,G7 C
+ch1: bt bt bt fill
+ch2: oom oom-3 oh+2 oh-5 oom
+ch3: la1 la6 la7 la8
+ch4: pM p7+9 hm+2 h7+7 rM
+
+[pattern A3 rows=64]
+chords: C Am F G7
+ch1: btc bt2 bt bt2
+ch2: oom oom-3 oom-7 oom-5
+ch3: la1 lv2 lv3 lv4
+ch4: pM pm+9 pM+5 r7+7
+
+[pattern A4 rows=64]
+chords: C A7 Dm,G7 C
+ch1: bt bt2 bt fill2
+ch2: oom oom-3 oh+2 oh-5 oom
+ch3: la1 la6 la7 lv8
+ch4: pM p7+9 hm+2 h7+7 rM
+
+[pattern B1 rows=64]
+chords: F Fm C A7
+ch1: btc bt2 bt2 bt2
+ch2: oom-7 oom-7 oom oom-3
+ch3: lb1 lb2 lb3 lb4
+ch4: pM+5 pm+5 rM p7+9
+
+[pattern B2 rows=64]
+chords: Dm G7 C G7
+ch1: bt2 bt2 bt2 fill2
+ch2: oom+2 oom-5 oom oomwalk
+ch3: lb5 lb6 lb7 lb8
+ch4: pm+2 p7+7 pM r7+7
+
+[pattern BR1 rows=64]
+chords: Am E7 Am E7
+ch1: btlite btlite btlite btlite
+ch2: oom-3 oom+4 oom-3 oom+4
+ch3: lr1 lr2 lr3 lr4
+ch4: qa qe qa qe
+
+[pattern BR2 rows=64]
+chords: F C Dm G7
+ch1: btlite btlite bt fill
+ch2: oom-7 oom oom+2 oom-5
+ch3: lr5 lr6 lr7 lr8
+ch4: qf qc qd qg
+
+[pattern A5 rows=64]
+chords: C Am F G7
+ch1: btc bt2 bt2 bt2
+ch2: oom oom-3 oom-7 oom-5
+ch3: la1 lv2 la3 lv4
+ch4: rM pm+9 pM+5 r7+7
+
+[pattern A6 rows=64]
+chords: C A7 Dm,G7 C,G7
+ch1: bt2 bt2 bt2 fill2
+ch2: oom oom-3 oh+2 oh-5 oh oh-5
+ch3: la1 la6 la7 lt8
+ch4: rM p7+9 hm+2 h7+7 hM h7+7
+
+# ================================================================ multiball (speed 5)
+[track mbt]
+C-3@kick C-3@hat C-3@hat C-3@kick C-3@snare C-3@hat C-3@kick C-3@hat C-3@kick C-3@hat C-3@hat C-3@kick C-3@snare C-3@hat C-3v20@snare C-3v30
+[track mbtc]
+C-3@crash C-3@hat C-3@hat C-3@kick C-3@snare C-3@hat C-3@kick C-3@hat C-3@kick C-3@hat C-3@hat C-3@kick C-3@snare C-3@hat C-3v20@snare C-3v30
+[track mfill]
+C-3@kick C-3@hat C-3@snare C-3@hat C-3@kick C-3@snare C-3@snare C-3@hat A-2@tom*2 F-2*2 C-3v44@snare C-3v50 C-3v58 C-3v64
+[track gal]
+C-2@bass*2 C-3*2 C-2*2 C-3*2 C-2*2 C-3*2 G-1*2 G-2*2
+[track galh]
+C-2@bass*2 C-3*2 G-1*2 G-2*2
+# arpeggio akordu w każdym wierszu (klasyczne „chip arpeggio”)
+[track aM]
+C-2v18@arp!!047*16
+[track am]
+C-2v18@arp!!037*16
+[track a7]
+C-2v18@arp!!04A*16
+[track ahm]
+C-2v18@arp!!037*8
+[track ahM]
+C-2v18@arp!!047*8
+[track ah7]
+C-2v18@arp!!04A*8
+[track hitC]
+C-2@orch*4 .*12
+[track hitA]
+A-1@orch*4 .*12
+
+[pattern MA1 rows=64]
+chords: C Am F G7
+ch1: mbtc mbt mbt mbt
+ch2: gal gal-3 gal-7 gal-5
+ch3: la1 la2 la3 la4
+ch4: aM am+9 aM+5 a7+7
+
+[pattern MA2 rows=64]
+chords: C A7 Dm,G7 C
+ch1: mbt mbt mbt mfill
+ch2: gal gal-3 galh+2 galh-5 gal
+ch3: la1 la6 la7 la8
+ch4: aM a7+9 ahm+2 ah7+7 aM
+
+[pattern MB1 rows=64]
+chords: F Fm C A7
+ch1: mbtc mbt mbt mbt
+ch2: gal-7 gal-7 gal gal-3
+ch3: lb1 lb2 lb3 lb4
+ch4: aM+5 am+5 aM a7+9
+
+[pattern MB2 rows=64]
+chords: Dm G7 C G7
+ch1: mbt mbt mbt mfill
+ch2: gal+2 gal-5 gal gal-5
+ch3: lb5 lb6 lb7 lb8
+ch4: am+2 a7+7 aM a7+7
+
+[pattern MA3 rows=64]
+chords: C Am F G7
+ch1: mbtc mbt mbt mbt
+ch2: gal gal-3 gal-7 gal-5
+ch3: la1 lv2 lv3 lv4
+ch4: hitC hitA aM+5 a7+7
+
+[pattern MA4 rows=64]
+chords: C A7 Dm,G7 C,G7
+ch1: mbt mbt mbt mfill
+ch2: gal gal-3 galh+2 galh-5 galh galh-5
+ch3: la1 la6 la7 lt8
+ch4: aM a7+9 ahm+2 ah7+7 ahM ah7+7
+
+# ================================================================ sekcje (osobne pliki)
+[order main]
+IN | A1 A2 A3 A4 B1 B2 BR1 BR2 A5 A6
+
+[order multiball speed=5 tempo=132]
+| MA1 MA2 MB1 MB2 MA3 MA4

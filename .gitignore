@@ -1,0 +1,18 @@
+# Godot 4
+.godot/
+/android/
+*.translation
+export/
+build/
+# OS / editor
+.DS_Store
+*.swp
+*~
+__pycache__/
+/tmp/
+
+# third-party reference material, never commit
+/Grab/
+/research/
+/shots/
+/dist/

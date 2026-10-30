@@ -1,0 +1,41 @@
+; Engine configuration file.
+; Copper Tilt — Amiga-spirited 2D pinball (original assets only)
+
+config_version=5
+
+[application]
+
+config/name="Copper Tilt"
+config/description="Amiga-spirited 2D pinball: copper bars, dot-matrix score, tracker music."
+config/version="0.1.0"
+run/main_scene="res://scenes/title.tscn"
+config/features=PackedStringArray("4.7", "GL Compatibility")
+config/icon="res://icon.svg"
+
+[autoload]
+
+Settings="*res://scripts/autoload/settings.gd"
+Sound="*res://scripts/autoload/sound.gd"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/size/mode=3
+window/size/resizable=true
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
+[physics]
+
+common/physics_ticks_per_second=200
+common/max_physics_steps_per_frame=12
+2d/default_gravity=740.0
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+limits/opengl/max_renderable_lights=256
+limits/opengl/max_lights_per_object=16
+environment/defaults/default_clear_color=Color(0.02, 0.0, 0.06, 1)

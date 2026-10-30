@@ -1,0 +1,56 @@
+# {{TITLE}} – szablon tematu stołu: intro + pętla A/B, sekcja multiball w tej samej tonacji
+# (gra przełącza sekcje na granicy taktu). Kanał 4 rzadki – miejsce na SFX gry.
+title    {{TITLE}}
+profile  pinball-table
+key      C major
+
+[instruments]
+01 kick  kick
+02 snare snare
+03 hat   hat_closed
+04 bass  pulse_bass vol=28
+05 lead  calliope vol=58
+06 arp   chip_square vol=40
+07 bell  bell
+08 crash crash
+
+[leadsheet]
+Forma: IN | A A' B A   (multiball: | A z gęstszą perkusją, speed 5)
+A : | C | Am | F | G7 |    motyw: G C E G | A . . . | F E D C | D . B .
+B : | F | G  | Em | Am |   odpowiedź dzwonkiem na końcu fraz
+
+[track bt]
+C-3@kick*4 C-3@hat*4 C-3@snare*4 C-3@hat*4
+[track btf]
+C-3@kick*4 C-3@hat*4 C-3@snare*2 C-3*2 C-3*2 C-3*2
+[track oom]
+C-1@bass*4 G-1*4 C-2*4 G-1*4
+[track pah]
+.*4 C-2v20@arp!!047*4 .*4 C-2v20@arp!!047*4
+[track pahm]
+.*4 C-2v20@arp!!037*4 .*4 C-2v20@arp!!037*4
+
+[pattern IN rows=16]
+chords: G7
+ch1: C-3@kick*4 C-3@snare*4 C-3*2 C-3*2 C-3*2 C-3*2
+ch2: G-1@bass*16
+ch3: G-2@bell*4 B-2*4 D-3*4 F-3*4
+
+[pattern A rows=64]
+chords: C Am F G7
+ch1: bt bt bt btf
+ch2: oom oom+9 oom+5 oom+7
+ch3: G-2@lead*4 C-3*4 E-3*4 G-3*4 A-3*16 F-3*4 E-3*4 C-3*8 D-3*8 B-2*8
+ch4: pah pahm+9 pah+5 pah+7
+
+[pattern B rows=64]
+chords: F G Em Am
+ch1: bt bt bt btf
+ch2: oom+5 oom+7 oom+4 oom+9
+ch3: A-2@lead*8 C-3*8 B-2*8 D-3*8 E-3*8 B-2*8 C-3*8 .*4 E-3v40@bell*4
+ch4: pah+5 pah+7 pahm+4 pahm+9
+
+[order main]
+IN | A A B A
+[order multiball speed=5]
+| A B

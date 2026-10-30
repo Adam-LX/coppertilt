@@ -1,0 +1,211 @@
+# CopperTilt – motyw menu w profilu 'unreal' (styl PC-tracker końca lat 90.: wiele kanałów,
+# sample 16-bit, panorama per kanał, echo + pogłos, osobne sekcje ambient / akcja).
+# Kompozycja własna (clean-room). Sekcja 'ambient' = menu, sekcja 'action' = tabela wyników / wpis rekordu.
+title    Nocne Wesołe Miasteczko – menu
+author   CopperTilt (agent: Grok Bot)
+profile  unreal
+channels 16
+speed    8
+tempo    125
+key      A minor
+#        pad pad pad choir bass glass harp lead kick snare hat shak taiko str  cym  saw
+pan      0.25 0.75 0.5 0.4 0.5 0.8 0.2 0.6 0.5 0.55 0.7 0.3 0.5 0.35 0.6 0.45
+send     0.55 0.55 0.55 0.8 0.0 1.0 0.7 0.6 0.1 0.25 0.2 0.3 0.25 0.35 0.4 0.5
+reverb   0.35
+delay    3 0.38 0.25
+normalize -14
+
+[instruments]
+01 pad     hq_pad
+02 choir   hq_choir
+03 bass    hq_bass
+04 glass   hq_glass
+05 harp    hq_harp
+06 epiano  hq_epiano
+07 flute   hq_flute
+08 kick    hq_kick
+09 snare   hq_snare vol=64
+10 hat     hq_hat
+11 shaker  hq_shaker
+12 taiko   hq_taiko
+13 strings hq_strings
+14 cymbal  hq_cymbal
+15 boom    hq_boom
+16 saw     hq_saw_lead
+
+[leadsheet]
+Tonacja a-moll, 4/4, 16 wierszy na takt.
+  ambient: speed 8 / T125 = 93,75 BPM (takt 2,56 s), pętla 16 taktów ≈ 41 s, intro 4 takty
+  action : speed 6 / T125 = 125 BPM   (takt 1,92 s), pętla 16 taktów ≈ 31 s, intro 2 takty
+Akordy (ta sama siatka w obu sekcjach, więc przejście ambient <-> akcja jest gładkie):
+  A  | Am  | F   | C   | G       |     motyw (szkło/e-piano): E5 . D C | C . A F | G . A C E | D . . B
+  A' | Am  | F   | Dm  | E       |     to samo, odpowiedź kończy się na G# (dominanta)
+  B  | F   | G   | Em  | Am      |     chór śpiewa długie A C | B D | E D B | C (pytanie)
+  B' | Dm  | F   | Esus4,E | E   |     chór: D F | E C | A G# | B (zawieszenie -> powrót do A)
+Głosy padu prowadzone najbliższą drogą (A-C-E -> A-C-F -> G-C-E -> G-B-D ...).
+Akcja: taiko + stopa/werbel, smyczki ostinato kwintami ósemkami, bas oktawami,
+  motyw w leadzie „saw” (A, A'), flet + chór w B/B'; talerz na początku każdej frazy.
+Dynamika: intro tylko pad + szkło -> A dochodzi bas i e-piano -> B chór + harfa + shaker.
+
+# ---------- ścieżki wielokrotnego użytku ----------
+[track ga]
+A-2v26@glass*2 C-3*2 E-3*2 A-3*2 E-3*2 C-3*2 A-2*2 C-3*2
+[track gM]
+F-2v26@glass*2 A-2*2 C-3*2 F-3*2 C-3*2 A-2*2 F-2*2 A-2*2
+[track hp]
+A-1v50@harp*4 E-2*4 A-2*4 C-3*4
+[track hP]
+F-1v50@harp*4 C-2*4 F-2*4 A-2*4
+[track shb]
+C-3v22@shaker C-3v12 C-3v16 C-3v12 C-3v22 C-3v12 C-3v16 C-3v12 C-3v22 C-3v12 C-3v16 C-3v12 C-3v22 C-3v12 C-3v16 C-3v12
+[track kb]
+C-3@kick*6 C-3*4 C-3*6
+[track kbf]
+C-3@kick*6 C-3*4 C-3*2 C-3*2 C-3*2
+[track sb]
+.*4 C-3@snare*8 C-3*4
+[track sfill]
+.*4 C-3@snare*4 C-3v34 C-3v38 C-3v42 C-3v46 C-3v50 C-3v54 C-3v58 C-3v64
+[track hb]
+C-3v28@hat*2 C-3v16*2 C-3v28*2 C-3v16*2 C-3v28*2 C-3v16*2 C-3v28*2 C-3v16*2
+[track tk]
+C-3@taiko*14 C-3v40 C-3v52
+[track so]
+A-1v34@strings*2 E-2*2 A-2*2 E-2*2 A-1*2 E-2*2 A-2*2 E-2*2
+[track bo]
+A-1v32@bass*2 A-2*2 A-1*2 A-2*2 A-1*2 A-2*2 A-1*2 A-2*2
+[track mAe]
+E-3v62@epiano*6 D-3*2 C-3*4 A-2*4 C-3*6 A-2*2 F-2*8 G-2*6 A-2*2 C-3*4 E-3*4 D-3*12 B-2*4
+[track mA2e]
+E-3v62@epiano*6 D-3*2 C-3*4 A-2*4 C-3*6 A-2*2 F-2*8 F-2*4 A-2*4 D-3*6 C-3*2 B-2*8 G#2*8
+[track mAs]
+E-3v44@saw*6 D-3*2 C-3*4 A-2*4 C-3*6 A-2*2 F-2*8 G-2*6 A-2*2 C-3*4 E-3*4 D-3*12 B-2*4
+[track mA2s]
+E-3v44@saw*6 D-3*2 C-3*4 A-2*4 C-3*6 A-2*2 F-2*8 F-2*4 A-2*4 D-3*6 C-3*2 B-2*8 G#2*8
+
+# ---------- AMBIENT ----------
+[pattern AIN rows=64]
+chords: Am F C G
+ch1: A-1v26@pad*16 A-1*16 G-1*16 G-1*16
+ch2: C-2v26@pad*16 C-2*16 C-2*16 B-1*16
+ch3: E-2v26@pad*16 F-2*16 E-2*16 D-2*16
+ch6: ga gM gM+7 gM+2
+ch15: C-3v40@boom*64
+
+[pattern A1 rows=64]
+chords: Am F C G
+ch1: A-1v25@pad*16 A-1*16 G-1*16 G-1*16
+ch2: C-2v25@pad*16 C-2*16 C-2*16 B-1*16
+ch3: E-2v25@pad*16 F-2*16 E-2*16 D-2*16
+ch5: A-1v26@bass*16 F-1*16 C-1*16 G-1*16
+ch6: ga gM gM+7 gM+2
+ch8: mAe
+ch13: .*60 C-3v20@snare*4
+
+[pattern A2 rows=64]
+chords: Am F Dm E
+ch1: A-1v25@pad*16 A-1*16 A-1*16 G#1*16
+ch2: C-2v25@pad*16 C-2*16 D-2*16 B-1*16
+ch3: E-2v25@pad*16 F-2*16 F-2*16 E-2*16
+ch5: A-1v26@bass*16 F-1*16 D-1*16 E-1*16
+ch6: ga gM ga+5 gM-1
+ch8: mA2e
+
+[pattern B1 rows=64]
+chords: F G Em Am
+ch1: A-1v25@pad*16 G-1*16 G-1*16 A-1*16
+ch2: C-2v25@pad*16 B-1*16 B-1*16 C-2*16
+ch3: F-2v25@pad*16 D-2*16 E-2*16 E-2*16
+ch4: A-2v54@choir*8 C-3*8 B-2*8 D-3*8 E-3*4 D-3*4 B-2*8 C-3*16
+ch5: F-1v26@bass*16 G-1*16 E-1*16 A-1*16
+ch7: hP hP+2 hp+7 hp
+ch12: shb*4
+ch15: C-3v36@cymbal*64
+
+[pattern B2 rows=64]
+chords: Dm F Esus4,E E
+ch1: A-1v25@pad*16 A-1*16 A-1*8 G#1*8 G#1*16
+ch2: D-2v25@pad*16 C-2*16 B-1*16 B-1*16
+ch3: F-2v25@pad*16 F-2*16 E-2*16 E-2*16
+ch4: D-3v54@choir*8 F-3*8 F-3*6 E-3*2 C-3*8 A-2*8 G#2*8 B-2*16
+ch5: D-1v26@bass*16 F-1*16 E-1*16 E-1*16
+ch7: hp+5 hP E-1v50@harp*4 B-1*4 E-2*4 G#2*4 E-1*4 B-1*4 E-2*4 B-2*4
+ch12: shb*4
+ch6: .*48 E-3v20@glass*4 B-2*4 G#2*4 E-2*4
+
+# ---------- ACTION ----------
+[pattern XIN rows=32]
+chords: Am E
+ch1: A-1v25@pad*16 G#1*16
+ch2: C-2v25@pad*16 B-1*16
+ch3: E-2v25@pad*16 E-2*16
+ch13: tk tk
+ch14: so so-5
+ch10: .*16 sfill
+ch15: C-3@boom*32
+
+[pattern X1 rows=64]
+chords: Am F C G
+ch1: A-1v28@pad*16 A-1*16 G-1*16 G-1*16
+ch2: C-2v28@pad*16 C-2*16 C-2*16 B-1*16
+ch3: E-2v28@pad*16 F-2*16 E-2*16 D-2*16
+ch5: bo bo+8 bo+3 bo-2
+ch9: kb*3 kbf
+ch10: sb*3 sfill
+ch11: hb*4
+ch13: tk*4
+ch14: so so+8 so+3 so-2
+ch15: C-3@cymbal*64
+ch16: mAs
+
+[pattern X2 rows=64]
+chords: Am F Dm E
+ch1: A-1v28@pad*16 A-1*16 A-1*16 G#1*16
+ch2: C-2v28@pad*16 C-2*16 D-2*16 B-1*16
+ch3: E-2v28@pad*16 F-2*16 F-2*16 E-2*16
+ch5: bo bo+8 bo+5 bo-5
+ch9: kb*3 kbf
+ch10: sb*3 sfill
+ch11: hb*4
+ch13: tk*4
+ch14: so so+8 so+5 so-5
+ch16: mA2s
+ch6: ga gM ga+5 gM-1
+
+[pattern X3 rows=64]
+chords: F G Em Am
+ch1: A-1v28@pad*16 G-1*16 G-1*16 A-1*16
+ch2: C-2v28@pad*16 B-1*16 B-1*16 C-2*16
+ch3: F-2v28@pad*16 D-2*16 E-2*16 E-2*16
+ch4: A-2v48@choir*8 C-3*8 B-2*8 D-3*8 E-3*4 D-3*4 B-2*8 C-3*16
+ch5: bo+8 bo-2 bo-5 bo
+ch7: hP hP+2 hp+7 hp
+ch8: A-2v44@flute*8 C-3*8 B-2*8 D-3*8 E-3*4 D-3*4 B-2*8 C-3*12 E-3*4
+ch9: kb*4
+ch10: sb*4
+ch11: hb*4
+ch12: shb*4
+ch13: tk*4
+ch14: so+8 so-2 so-5 so
+ch15: C-3@cymbal*64
+
+[pattern X4 rows=64]
+chords: Dm F Esus4,E E
+ch1: A-1v28@pad*16 A-1*16 A-1*8 G#1*8 G#1*16
+ch2: D-2v28@pad*16 C-2*16 B-1*16 B-1*16
+ch3: F-2v28@pad*16 F-2*16 E-2*16 E-2*16
+ch4: D-3v48@choir*8 F-3*8 F-3*6 E-3*2 C-3*8 A-2*8 G#2*8 B-2*16
+ch5: bo+5 bo+8 bo-5 bo-5
+ch8: D-3v44@flute*8 F-3*8 F-3*6 E-3*2 C-3*8 A-2*8 G#2*8 B-2*16
+ch9: kb*3 kbf
+ch10: sb*3 sfill
+ch11: hb*4
+ch12: shb*4
+ch13: tk*3 C-3@taiko*4 C-3*4 C-3*2 C-3*2 C-3*2 C-3*2
+ch14: so+5 so+8 so-5 so-5
+ch15: .*48 C-3v30@boom*16
+
+[order ambient]
+AIN | A1 A2 B1 B2
+[order action speed=6 tempo=125]
+XIN | X1 X2 X3 X4

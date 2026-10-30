@@ -1,0 +1,163 @@
+# Midnight Funfair – dżingle (stingery). Każda sekcja [order X] = osobny plik X.ogg, bez pętli.
+# Profil 'stinger': speed 4 / tempo 125 => wiersz = 80 ms, 16 wierszy = 1,28 s.
+title    Midnight Funfair stingers
+author   CopperTilt (agent: Grok Bot)
+profile  stinger
+channels 4
+pan      L R R L
+stereo   0.7
+key      C major
+normalize -14
+tail     1.2
+
+[instruments]
+01 kick   kick
+02 snare  snare
+03 crash  crash
+04 bass   pulse_bass vol=30
+05 brass  brass vol=56
+06 chip   chip_square vol=36
+07 bell   bell vol=56
+08 orch   orch_hit
+09 lead   calliope vol=58
+10 pluck  pluck
+11 organ  organ vol=40
+
+[leadsheet]
+Wszystkie dżingle w C-dur (jak stół), więc nakładają się na muzykę bez zgrzytu.
+Motyw stołu (G4 C5 E5 G5) wraca w: extra_ball, highscore, menu_start.
+  ball_lost    | Fm | C  |        moll subdominanta „ojej”: C5 Ab4 F4 -> E4 (ton prowadzący w dół), 1,9 s
+  extra_ball   | C  | G7,C |      fanfara motywem stołu, werbel + talerz
+  jackpot      | F,G | C |        uderzenia orkiestry F-G-C + arpeggio 16-tkami w górę
+  match        | C,G7 | C |       dzwonki „ding-ding-ding”, potem akord
+  match_miss   | Fm |             Ab -> F, krótko, bez dramatu
+  match_tick   | C  |             jeden dzwonek (licznik loterii)
+  extra_chance | F,G |            pytające arpeggio kończone na G (dominanta = „jeszcze nie koniec”)
+  game_over    | Am | F,Fm | C |   kadencja moll-plagalna, wolno, z vibrato
+  final_score  | G7,C |           szybki „podpis” pod wynikiem
+  highscore    | C | Am,F | G7,C | triumf: motyw stołu w blasze
+  menu         | C |              wejście w podstronę: dwa dźwięki w górę
+  menu_move    | C |              jeden blip
+  menu_back    | C |              dwa dźwięki w dół
+  menu_start   | C |              arpeggio w górę + talerz
+  menu_denied  | Cdim |           niski „bzyk”, tryton
+
+[pattern ball_lost rows=24]
+chords: Fm C
+ch1: .*16 C-3v30@kick .*7
+ch2: F-1@bass*16 C-1*8
+ch3: C-3@brass*4 G#2*4 F-2*8 E-2*2 .!!443*6
+ch4: F-2v26@chip!!037*16 C-2v30@chip!!047*8
+
+[pattern extra_ball rows=32]
+chords: C G7,C
+ch1: C-3@snare C-3v30 C-3v36 C-3v42 C-3@kick*4 C-3@snare*2 C-3@snare*2 C-3@kick*4 C-3@snare*2 C-3v40 C-3v50 C-3@crash*8
+ch2: C-2@bass*4 C-3*4 C-2*4 G-1*4 G-1*4 D-2*4 C-2*8
+ch3: G-2@brass*2 C-3*2 E-3*2 G-3*6 E-3*2 G-3*2 F-3*4 D-3*4 E-3*2 C-3*6
+ch4: G-2v40@bell*2 C-3*2 E-3*2 G-3*10 B-2*4 G-2*4 C-3*8
+
+[pattern jackpot rows=32]
+chords: F,G C
+ch1: C-3@crash*8 C-3@kick*8 C-3@crash*16
+ch2: F-1@orch*8 G-1*8 C-2*16
+ch3: A-2@lead C-3 F-3 A-3 G-2 B-2 D-3 G-3 B-2 D-3 G-3 B-3 C-3 E-3 G-3 C-3 E-3*2 G-3*2 C-3*4 .!!443*8
+ch4: F-1@bass*8 G-1*8 C-2*4 C-3*4 C-2*8
+
+[pattern match rows=32]
+chords: C,G7 C
+ch1: .*8 C-3@kick*8 C-3@crash*16
+ch2: C-2@bass*8 G-1*8 C-2*16
+ch3: G-3@bell*2 E-3*2 G-3*2 C-3*2 D-3@brass*4 F-3*4 E-3*4 G-3*4 .!!443*8
+ch4: E-3v40@bell*2 C-3*2 E-3*2 G-2*2 G-2v30@chip!!04A*8 C-2v30@chip!!047*16
+
+[pattern match_miss rows=12]
+chords: Fm
+ch3: G#2@pluck*4 F-2*8
+ch2: F-1@bass*12
+
+[pattern match_tick rows=2]
+chords: C
+ch3: G-3@bell*2
+
+[pattern extra_chance rows=24]
+chords: F,G7 G7
+ch1: C-3v30@snare*2 C-3v36*2 C-3v42*2 C-3v50*2 C-3v58*2 C-3v64*2 C-3@crash*12
+ch2: F-1@bass*8 G-1*16
+ch3: A-2@pluck*2 C-3*2 F-3*2 A-3*2 G-2*2 B-2*2 D-3*2 G-3*10
+ch4: F-2v30@chip!!047*8 G-2v30@chip!!04A*16
+
+[pattern game_over rows=48]
+chords: Am F,Fm C
+ch1: C-3v40@kick*16 .*16 C-3v34@crash*16
+ch2: A-1@bass*16 F-1*16 C-1*16
+ch3: E-3@brass*8 C-3*8 A-2*8 G#2*8 G-2*4 .!!443*12
+ch4: A-2v34@organ*16 A-2*8 G#2*8 E-2*16
+
+[pattern final_score rows=16]
+chords: G7,C
+ch1: C-3@snare*2 C-3v44*2 C-3v52*2 C-3v60*2 C-3@crash*8
+ch2: G-1@bass*8 C-2*8
+ch3: B-2@lead D-3 F-3 G-3 F-3 D-3 B-2 D-3 C-3*8
+ch4: G-2v30@chip!!04A*8 C-3v40@bell*8
+
+[pattern highscore rows=48]
+chords: C Am,F G7,C
+ch1: C-3@crash*4 C-3@kick*4 C-3@snare*4 C-3@kick*4 C-3@kick*4 C-3@snare*4 C-3@kick*4 C-3@snare*2 C-3v40*2 C-3@kick*4 C-3@snare*4 C-3@crash*8
+ch2: C-2@bass*4 C-3*4 G-1*4 C-2*4 A-1*4 A-2*4 F-1*4 F-2*4 G-1*4 G-2*4 C-2*8
+ch3: G-2@brass*2 C-3*2 E-3*2 G-3*10 A-3*4 G-3*4 F-3*4 A-3*4 G-3*4 F-3*2 D-3*2 E-3*2 C-3*2 .!!443*4
+ch4: C-2v26@chip!!047*16 A-1v26@chip!!037*8 F-2v26@chip!!047*8 G-2v26@chip!!04A*8 C-3v40@bell*8
+
+[pattern menu rows=4]
+chords: C
+ch3: C-3v40@chip*2 G-3v40*2
+
+[pattern menu_move rows=1]
+chords: C
+ch3: E-3v34@chip
+
+[pattern menu_back rows=4]
+chords: C
+ch3: G-3v40@chip*2 C-3v40*2
+
+[pattern menu_start rows=16]
+chords: C
+ch1: .*8 C-3@crash*8
+ch2: C-2@bass*8 C-1*8
+ch3: G-2@lead C-3 E-3 G-3 C-3 E-3 G-3 E-3 C-3*8
+ch4: C-2v30@chip!!047*8 C-3v40@bell*8
+
+[pattern menu_denied rows=6]
+chords: Cdim
+ch2: C-1@bass*3 F#1*3
+ch3: C-2v30@chip!!036*6
+
+[order ball_lost]
+ball_lost
+[order extra_ball]
+extra_ball
+[order jackpot]
+jackpot
+[order match]
+match
+[order match_miss tail=0.6 normalize=-16]
+match_miss
+[order match_tick tail=0.4 normalize=-20]
+match_tick
+[order extra_chance]
+extra_chance
+[order game_over tail=2.0]
+game_over
+[order final_score]
+final_score
+[order highscore tail=1.6]
+highscore
+[order menu tail=0.3 normalize=-20]
+menu
+[order menu_move tail=0.2 normalize=-22]
+menu_move
+[order menu_back tail=0.3 normalize=-20]
+menu_back
+[order menu_start tail=1.0 normalize=-16]
+menu_start
+[order menu_denied tail=0.3 normalize=-20]
+menu_denied

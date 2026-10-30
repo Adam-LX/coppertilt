@@ -1,0 +1,52 @@
+{
+ "sr": 44100,
+ "loops": {
+  "roll_playfield": {
+   "length_s": 2.4,
+   "lufs": -18.0,
+   "seam_ratio": 0.163
+  },
+  "roll_plastic": {
+   "length_s": 2.4,
+   "lufs": -18.0,
+   "seam_ratio": 0.353
+  },
+  "roll_wire": {
+   "length_s": 2.4,
+   "lufs": -18.0,
+   "seam_ratio": 0.289
+  },
+  "roll_shimmer": {
+   "length_s": 2.4,
+   "lufs": -18.0,
+   "seam_ratio": 0.179
+  }
+ },
+ "oneshots": {
+  "ramp_drop": {
+   "length_s": 0.32,
+   "peak_dbfs": -3.0,
+   "rms50ms_dbfs": -14.5
+  },
+  "ball_click": {
+   "length_s": 0.06,
+   "peak_dbfs": -6.0,
+   "rms50ms_dbfs": -25.1
+  },
+  "hit_flipper": {
+   "length_s": 0.14,
+   "peak_dbfs": -4.0,
+   "rms50ms_dbfs": -15.8
+  },
+  "hit_rubber": {
+   "length_s": 0.18,
+   "peak_dbfs": -4.0,
+   "rms50ms_dbfs": -13.4
+  },
+  "hit_metal": {
+   "length_s": 0.35,
+   "peak_dbfs": -6.0,
+   "rms50ms_dbfs": -15.5
+  }
+ }
+}

@@ -1,0 +1,40 @@
+# {{TITLE}} – szablon dżingli: każda sekcja [order X] = osobny plik X.ogg (bez pętli, z ogonem).
+title    {{TITLE}}
+profile  stinger
+key      C major
+tail     1.2
+
+[instruments]
+01 kick  kick
+02 snare snare
+03 crash crash
+04 bass  pulse_bass vol=30
+05 brass brass vol=56
+06 bell  bell vol=56
+
+[leadsheet]
+win  | G7,C |  fanfara w górę, talerz na końcu
+lose | Fm   |  As -> F, krótko
+blip | C    |  jeden dźwięk (UI) – normalize=-20, żeby nie był głośniejszy od muzyki
+
+[pattern win rows=16]
+chords: G7,C
+ch1: C-3@snare*2 C-3v44*2 C-3v52*2 C-3v60*2 C-3@crash*8
+ch2: G-1@bass*8 C-2*8
+ch3: G-2@brass*2 B-2*2 D-3*2 F-3*2 E-3*8
+
+[pattern lose rows=12]
+chords: Fm
+ch2: F-1@bass*12
+ch3: G#2@brass*4 F-2*8
+
+[pattern blip rows=2]
+chords: C
+ch3: G-3@bell*2
+
+[order win]
+win
+[order lose tail=0.6]
+lose
+[order blip tail=0.3 normalize=-20]
+blip

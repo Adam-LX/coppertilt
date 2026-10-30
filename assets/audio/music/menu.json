@@ -1,0 +1,32 @@
+{
+ "section": "ambient",
+ "title": "Midnight Funfair – menu",
+ "profile": "unreal",
+ "rate": 44100,
+ "speed": 8,
+ "tempo": 125,
+ "bpm": 93.75,
+ "bar_s": 2.56,
+ "loop": true,
+ "loop_offset_samples": 451584,
+ "loop_offset": 10.24,
+ "loop_len_s": 40.96,
+ "length_s": 51.2,
+ "bars": 20.0,
+ "tempo_changes": [
+  [
+   8,
+   125
+  ]
+ ],
+ "lufs": -14.0,
+ "true_peak_dbtp": -2.14,
+ "seam": {
+  "jump": 0.1287,
+  "p999": 0.2119,
+  "ratio": 0.607,
+  "rms_jump_db": 4.46,
+  "verdict": "OK"
+ },
+ "file": "menu_ambient.ogg"
+}

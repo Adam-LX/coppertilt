@@ -1,0 +1,74 @@
+# {{TITLE}} – szablon 'unreal' (PC-tracker końca lat 90.): 16 kanałów, sample 16-bit, panorama
+# per kanał, echo + pogłos, dwie sekcje: ambient i action (ta sama siatka akordów => gładkie przejście).
+title    {{TITLE}}
+profile  unreal
+channels 16
+speed    8
+key      A minor
+#        pad pad pad choir bass glass harp lead kick snare hat shak taiko str cym saw
+pan      0.25 0.75 0.5 0.4 0.5 0.8 0.2 0.6 0.5 0.55 0.7 0.3 0.5 0.35 0.6 0.45
+send     0.55 0.55 0.55 0.8 0.0 1.0 0.7 0.6 0.1 0.25 0.2 0.3 0.25 0.35 0.4 0.5
+reverb   0.35
+delay    3 0.38 0.25
+
+[instruments]
+01 pad     hq_pad
+02 choir   hq_choir
+03 bass    hq_bass
+04 glass   hq_glass
+05 harp    hq_harp
+06 epiano  hq_epiano
+07 flute   hq_flute
+08 kick    hq_kick
+09 snare   hq_snare vol=64
+10 hat     hq_hat
+11 shaker  hq_shaker
+12 taiko   hq_taiko
+13 strings hq_strings
+14 cymbal  hq_cymbal
+15 boom    hq_boom
+16 saw     hq_saw_lead
+
+[leadsheet]
+| Am | F | C | G |  ambient: pad + szkło (echo) + e-piano;  action: taiko, smyczki, bas, saw lead
+
+[track ga]
+A-2v26@glass*2 C-3*2 E-3*2 A-3*2 E-3*2 C-3*2 A-2*2 C-3*2
+[track gM]
+F-2v26@glass*2 A-2*2 C-3*2 F-3*2 C-3*2 A-2*2 F-2*2 A-2*2
+[track so]
+A-1v34@strings*2 E-2*2 A-2*2 E-2*2 A-1*2 E-2*2 A-2*2 E-2*2
+[track bo]
+A-1v32@bass*2 A-2*2 A-1*2 A-2*2 A-1*2 A-2*2 A-1*2 A-2*2
+[track kb]
+C-3@kick*6 C-3*4 C-3*6
+[track sb]
+.*4 C-3@snare*8 C-3*4
+[track tk]
+C-3@taiko*14 C-3v40 C-3v52
+
+[pattern AMB rows=64]
+chords: Am F C G
+ch1: A-1v25@pad*16 A-1*16 G-1*16 G-1*16
+ch2: C-2v25@pad*16 C-2*16 C-2*16 B-1*16
+ch3: E-2v25@pad*16 F-2*16 E-2*16 D-2*16
+ch5: A-1v26@bass*16 F-1*16 C-1*16 G-1*16
+ch6: ga gM gM+7 gM+2
+ch8: E-3v62@epiano*6 D-3*2 C-3*4 A-2*4 C-3*6 A-2*2 F-2*8 G-2*6 A-2*2 C-3*4 E-3*4 D-3*12 B-2*4
+
+[pattern ACT rows=64]
+chords: Am F C G
+ch1: A-1v28@pad*16 A-1*16 G-1*16 G-1*16
+ch2: C-2v28@pad*16 C-2*16 C-2*16 B-1*16
+ch3: E-2v28@pad*16 F-2*16 E-2*16 D-2*16
+ch5: bo bo+8 bo+3 bo-2
+ch9: kb*4
+ch10: sb*4
+ch13: tk*4
+ch14: so so+8 so+3 so-2
+ch16: E-3v44@saw*6 D-3*2 C-3*4 A-2*4 C-3*6 A-2*2 F-2*8 G-2*6 A-2*2 C-3*4 E-3*4 D-3*12 B-2*4
+
+[order ambient]
+| AMB
+[order action speed=6 tempo=125]
+| ACT

@@ -1,0 +1,21 @@
+{
+	"balls": 3,
+	"ball_save": 8.0,
+	"ball_save_once": true,
+	"max_extra_balls": 2,
+	"match": {
+		"enabled": true,
+		"place": 10,
+		"digits": 1,
+		"step": 1,
+		"odds": -1.0,
+		"award": "extra_ball",
+		"max_per_game": 1,
+		"min_score": 0,
+		"spin_time": 2.0
+	},
+	"game_over_time": 3.2,
+	"final_score_time": 2.8,
+	"entry_timeout": 40.0,
+	"attract_after": 12.0
+}

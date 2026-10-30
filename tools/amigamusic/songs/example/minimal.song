@@ -1,0 +1,34 @@
+# Przykład minimalny – najmniejszy działający utwór (4 kanały, profil 'demo'). Zmień nuty i renderuj:
+#   python3 -m amigamusic check  plik.song
+#   python3 -m amigamusic render plik.song -o out.ogg --png
+title    Przykład minimalny
+author   ?
+profile  demo
+key      C major
+
+[instruments]
+01 kick  kick
+02 snare snare
+03 hat   hat_closed
+04 bass  slap_bass vol=40
+05 lead  detune_lead vol=52
+06 arp   chip_square vol=30
+
+[leadsheet]
+Motyw 4 takty: C-E-G | A-G | F-E-D | (G7) D-B
+Akordy: | C | Am | F | G7 |
+
+[track beat]
+C-3@kick*4 C-3@hat*4 C-3@snare*4 C-3@hat*4
+[track bassC]
+C-1@bass*4 C-2*4 G-1*4 C-2*4
+
+[pattern A rows=64]
+chords: C Am F G7
+ch1: beat*4
+ch2: bassC bassC+9 bassC+5 bassC+7
+ch3: C-3@lead*4 E-3*4 G-3*8 A-3*8 E-3*8 F-3*8 C-3*8 D-3*8 B-2!401*8
+ch4: C-2v24@arp!!047*16 A-1v24@arp!!037*16 F-1v24@arp!!047*16 G-1v24@arp!!04A*16
+
+[order main]
+A | A

@@ -1,0 +1,30 @@
+# {{TITLE}} – szablon „cracktro”: krótka pętla, chipowe sample, arpeggio 0xy, twarde stereo LRRL.
+title    {{TITLE}}
+profile  cracktro
+key      A minor
+
+[instruments]
+01 kick  kick
+02 snare snare
+03 hat   hat_closed
+04 bass  chip_bass vol=40
+05 sq    chip_square vol=40
+06 tri   chip_tri vol=48
+
+[leadsheet]
+| Am | F | C | G |  – arpeggio molowe/durowe w kanale 4, melodia trójkątem z vibrato.
+
+[track bt]
+C-3@kick*2 C-3@hat*2 C-3@snare*2 C-3@hat*2 C-3@kick*2 C-3@kick*2 C-3@snare*2 C-3@hat*2
+[track bs]
+A-1@bass*2 A-2*2 A-1*2 A-2*2 A-1*2 A-2*2 A-1*2 A-2*2
+
+[pattern A rows=64]
+chords: Am F C G
+ch1: bt*4
+ch2: bs bs+8 bs+3 bs-2
+ch3: E-3@tri!!403*8 A-3*8 C-3*8 F-3*8 E-3*8 G-3*8 D-3*8 B-2*8
+ch4: A-2v30@sq!!037*16 F-2v30@sq!!047*16 C-2v30@sq!!047*16 G-2v30@sq!!047*16
+
+[order main]
+| A

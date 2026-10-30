@@ -1,0 +1,32 @@
+{
+ "section": "main",
+ "title": "Midnight Funfair",
+ "profile": "pinball-table",
+ "rate": 44100,
+ "speed": 6,
+ "tempo": 132,
+ "bpm": 132.0,
+ "bar_s": 1.818182,
+ "loop": true,
+ "loop_offset_samples": 320727,
+ "loop_offset": 7.272721,
+ "loop_len_s": 72.727,
+ "length_s": 80.0,
+ "bars": 44.0,
+ "tempo_changes": [
+  [
+   6,
+   132
+  ]
+ ],
+ "lufs": -14.0,
+ "true_peak_dbtp": -4.62,
+ "seam": {
+  "jump": 0.119,
+  "p999": 0.1552,
+  "ratio": 0.767,
+  "rms_jump_db": 0.82,
+  "verdict": "OK"
+ },
+ "file": "main.ogg"
+}
