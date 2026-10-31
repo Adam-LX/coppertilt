@@ -13,8 +13,8 @@ uniform float self_lit = 0.55;     // part of the art shown regardless of light 
 void fragment() {
 	vec3 c = texture(tex, UV).rgb * tint;
 	ALBEDO = c * (1.0 - self_lit);
-	EMISSION = c * self_lit + c * flash_color * flash * 2.2;
+	EMISSION = c * self_lit + c * flash_color * flash * 1.6;
 	ROUGHNESS = rough;
 	METALLIC = metal;
-	SPECULAR = 0.75;
+	SPECULAR = 0.6;
 }

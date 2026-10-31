@@ -28,23 +28,17 @@ void fragment() {
 	// view space of the top-down camera: x = table x, y = -table y (screen up), z = up
 	NORMAL = normalize(vec3(n.x * normal_strength, n.y * normal_strength, 1.0));
 	sp = texture(spec_tex, uv).r;
-	ROUGHNESS = mix(0.18, 0.32, 1.0 - sp * 0.7);
-	METALLIC = sp * 0.15;
-	SPECULAR = 0.5 + 0.5 * sp;
+	ROUGHNESS = 0.4;
 }
 
 void light() {
 	float nd = clamp(dot(NORMAL, LIGHT), 0.0, 1.0);
 	if (LIGHT_IS_DIRECTIONAL) {
 		DIFFUSE_LIGHT += vec3(mix(shade, 1.0, ATTENUATION) * clamp(nd / 0.79, 0.0, 1.2));
-		vec3 h_dir = normalize(VIEW + LIGHT);
-		float spec_d = pow(max(dot(NORMAL, h_dir), 0.0), 48.0);
-		SPECULAR_LIGHT += LIGHT_COLOR * spec_d * (0.10 + 0.75 * sp) * ATTENUATION;
 	} else {
 		vec3 c = LIGHT_COLOR * ATTENUATION * omni_gain / PI;
 		DIFFUSE_LIGHT += c * nd;
 		vec3 h = normalize(VIEW + LIGHT);
-		float spec_omni = pow(max(dot(NORMAL, h), 0.0), 60.0) * 0.95 + pow(max(dot(NORMAL, h), 0.0), 16.0) * 0.30;
-		SPECULAR_LIGHT += c * spec_omni * (0.22 + 1.5 * sp);
+		SPECULAR_LIGHT += c * pow(max(dot(NORMAL, h), 0.0), 36.0) * (0.15 + 1.2 * sp);
 	}
 }
