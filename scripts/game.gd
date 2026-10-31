@@ -90,6 +90,9 @@ var _style := ""
 var _px_per_unit := 4.0
 
 
+var _ball_log := "--ball-log" in OS.get_cmdline_user_args()
+
+
 func _ready() -> void:
 	_load_rules()
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -156,6 +159,7 @@ func _ready() -> void:
 	_layout()
 	_end_preview()
 	_still_setup()
+	_grab_table()
 
 
 # --- layout ------------------------------------------------------------------
@@ -389,6 +393,10 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _process(delta: float) -> void:
 	_time += delta
+	# `--ball-log` prints the first ball's screen position every frame (tracking crops for clips)
+	if _ball_log and table and table.balls.size() > 0 and table.balls[0].sprite:
+		var sp: Vector2 = table.balls[0].sprite.get_global_transform_with_canvas().origin
+		print("[ball] %d %.1f %.1f" % [Engine.get_process_frames(), sp.x, sp.y])
 	if glass and table:
 		(glass.material as ShaderMaterial).set_shader_parameter("t", table._time)
 	if get_tree().paused:
@@ -919,6 +927,33 @@ func _draw_end(delta: float) -> void:
 			_big_or_small(pages[pi], mid, v)
 
 
+## M12_GRAB: menu carousel preview (`--grab-table=PATH[@WxH]`): saves the playfield SubViewport
+## (2D or 3D view, no DMD/HUD) after a few frames, scaled to WxH (default 600x1200), then quits.
+## Used by tools/make_preview3d.sh; window must be tall enough to show the whole table.
+func _grab_table() -> void:
+	var arg := ""
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--grab-table="):
+			arg = a.get_slice("=", 1)
+	if arg == "":
+		return
+	var path := arg.get_slice("@", 0)
+	var wh := Vector2i(600, 1200)
+	if arg.contains("@"):
+		var d := arg.get_slice("@", 1).split("x")
+		wh = Vector2i(d[0].to_int(), d[1].to_int())
+	for i in 90:
+		await get_tree().process_frame
+	await RenderingServer.frame_post_draw
+	var img := sv.get_texture().get_image()
+	print("[grab] sv %dx%d view_h=%.1f" % [img.get_width(), img.get_height(), _view_h])
+	img.convert(Image.FORMAT_RGB8)
+	img.resize(wh.x, wh.y, Image.INTERPOLATE_LANCZOS)
+	img.save_png(path)
+	print("[grab] saved ", path)
+	get_tree().quit()
+
+
 ## Still shots (`--still-cam=Y --still-ball=X,Y`): a frozen, staged frame (ball placed, one bumper
 ## flashing, fixed score and lamp time) so before/after art comparisons use the identical frame.
 func _still_setup() -> void:
@@ -934,6 +969,16 @@ func _still_setup() -> void:
 		table.balls[0].vel = Vector2.ZERO
 	if table.bumper_flash.size() > 0:
 		table.bumper_flash[0] = 0.9
+	# `--still-flash=all|name,name` fires flashers (and `bumpers` lights every bumper) for the frame
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--still-flash="):
+			for n in a.get_slice("=", 1).split(","):
+				if n == "bumpers":
+					for i in table.bumper_flash.size():
+						table.bumper_flash[i] = 0.9
+				for f in table.flash:
+					if n == "all" or n == f:
+						table.flash[f] = 1.0
 
 
 ## Screenshot hook: `-- --autostart --end-preview=match-hit|match-miss|gameover|final|entry|over[@SEC]`

@@ -56,16 +56,16 @@ stage() { # stage [katalog]: czysty snapshot HEAD (domyślnie $SRC; build import
 
 scan() {
 	local dir="$1" bad=0 hits
-	hits=$(cd "$dir" && find . -type f | sed 's#^\./##' | grep -E -i "$DENY_EXT|(^|/)(Grab|research|shots|dist|\.godot)/" || true)
+	hits=$(cd "$dir" && find . -name .git -prune -o -type f -print | sed 's#^\./##' | grep -E -i "$DENY_EXT|(^|/)(Grab|research|shots|dist|\.godot)/" || true)
 	[[ -n "$hits" ]] && { echo "BŁĄD: zakazane pliki:" >&2; echo "$hits" >&2; bad=1; }
-	hits=$(grep -rIl -i -E "$DENY_RE" "$dir" --exclude=.gitignore --exclude=publish.sh --exclude=export_presets.cfg || true)
+	hits=$(grep -rIl -i -E "$DENY_RE" "$dir" --exclude-dir=.git --exclude=.gitignore --exclude=publish.sh --exclude=export_presets.cfg || true)
 	[[ -n "$hits" ]] && { echo "BŁĄD: prywatne/zakazane wzorce w:" >&2; echo "$hits" >&2; bad=1; }
 	local pf="${PRIVATE_PATTERNS:-$HOME/.config/ignite/mirror-private-patterns}"
 	if [[ -f "$pf" ]]; then
-		hits=$(grep -rIl -i -E -f "$pf" "$dir" || true)
+		hits=$(grep -rIl -i -E -f "$pf" "$dir" --exclude-dir=.git || true)
 		[[ -n "$hits" ]] && { echo "BŁĄD: dane prywatne ($pf) w:" >&2; echo "$hits" >&2; bad=1; }
 	fi
-	hits=$(find "$dir" -type f -size +20M)
+	hits=$(find "$dir" -name .git -prune -o -type f -size +20M -print)
 	[[ -n "$hits" ]] && { echo "BŁĄD: pliki > 20 MB:" >&2; echo "$hits" >&2; bad=1; }
 	(( bad == 0 )) || exit 1
 	echo "Skan OK (bez Grab/research, bez sekretów i ścieżek prywatnych)."

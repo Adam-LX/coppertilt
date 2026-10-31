@@ -105,21 +105,61 @@ func _ready() -> void:
 	_check(Settings.scores_for(str(tabs[0].id)).size() == Settings.HS_COUNT, "top 5 listed")
 	_press(&"ui_accept")
 	_check(m.page == "main", "BACK from scores")
-	# carousel wraps (one table today -> stays; more tables -> moves)
-	m.sel = 0
+	# M12 carousel: Left/Right always slide the table carousel on the main page
+	_check(m._previews3d.size() == tabs.size(), "3D preview cards loaded: %d" % m._previews3d.size())
+	m.sel = 2
 	var ti: int = m._ti
 	_press(&"ui_right")
-	_check(m._ti == (ti + 1) % tabs.size(), "carousel right")
+	_check(m._ti == (ti + 1) % tabs.size() and m.sel == 2, "carousel right (menu on OPTIONS)")
+	_check(absf(m._slide) > 0.5, "slide animation started: %.2f" % m._slide)
+	await get_tree().create_timer(0.6).timeout
+	_check(m._slide == 0.0, "slide eased to rest")
 	_press(&"flip_left")
 	_check(m._ti == ti, "carousel left (flipper button)")
-	# portrait and ultrawide layouts draw without errors
-	for sz in [Vector2(2560, 1080), Vector2(1080, 1920), Vector2(1280, 720)]:
+	for i in tabs.size():
+		_press(&"flip_right")
+	_check(m._ti == ti, "wraps around after %d presses" % tabs.size())
+	_press(&"ui_left")
+	_check(m._ti == (ti - 1 + tabs.size()) % tabs.size(), "left wraps to the last table")
+	_press(&"ui_right")
+	# mouse / touch swipe on the carousel
+	m.sel = 0
+	await _frames(2)
+	_check(m._car_rect.size.x > 0.0, "carousel area laid out")
+	var c: Vector2 = m._car_rect.get_center()
+	var ev := InputEventMouseButton.new()
+	ev.button_index = MOUSE_BUTTON_LEFT
+	ev.pressed = true
+	ev.position = c
+	m._gui_input(ev)
+	var mm := InputEventMouseMotion.new()
+	mm.position = c - Vector2(m._card_w * 0.5, 0)
+	mm.relative = Vector2(-m._card_w * 0.5, 0)
+	m._gui_input(mm)
+	_check(m._slide < -0.3, "drag follows the pointer: %.2f" % m._slide)
+	var up := InputEventMouseButton.new()
+	up.button_index = MOUSE_BUTTON_LEFT
+	up.pressed = false
+	up.position = mm.position
+	m._gui_input(up)
+	_check(m._ti == (ti + 1) % tabs.size(), "swipe left -> next table")
+	ev.position = Vector2(m._car_rect.end.x - 4.0, c.y)   # right-hand neighbour card
+	m._gui_input(ev)
+	up.position = ev.position
+	m._gui_input(up)
+	_check(m._ti == (ti + 2) % tabs.size(), "click on right card -> next table")
+	_check(m._items()[0][1] == tabs[m._ti].name, "TABLE item follows the carousel")
+	while m._ti != ti:
+		_press(&"ui_left")
+	# landscape, ultrawide and portrait layouts draw without errors
+	for sz in [Vector2(1920, 1080), Vector2(3840, 1080), Vector2(1080, 1920), Vector2(1280, 720)]:
 		m.size = sz
 		for p in ["main", "options", "scores", "controls"]:
 			m.page = p
 			m.sel = 0
 			await _frames(2)
-	_check(true, "all pages drawn at 3 more sizes")
+	m.page = "main"
+	_check(true, "all pages drawn at 4 sizes")
 	Settings.style = style0
 	Settings.set_tempo(tempo0)
 	Settings.set_volume("music", music0)

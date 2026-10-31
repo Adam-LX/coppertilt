@@ -20,7 +20,16 @@ var _logo: Texture2D = preload("res://assets/art/logo.png")
 var _tables: Array = []
 var _previews: Dictionary = {}
 var _ti := 0                   # selected table
-var _slide := 0.0              # carousel slide animation (-1..1)
+var _slide := 0.0              # M12_CAROUSEL: slide offset in card units (0 = settled)
+var _slide_from := 0.0         # offset at the start of the eased slide
+var _demo_steps: Array = []
+var _slide_t := 1.0            # eased slide progress 0..1
+var _previews3d: Dictionary = {}
+var _drag := false             # mouse / touch drag on the carousel
+var _drag_x0 := 0.0
+var _drag_moved := 0.0
+var _car_rect := Rect2()       # last drawn carousel area (for mouse hit tests)
+var _card_w := 1.0
 var page := "main"             # main | options | scores | controls
 var sel := 0
 var _idle := 0.0
@@ -33,6 +42,7 @@ func _ready() -> void:
 	backdrop = CopperBackdrop.new()
 	backdrop.floor_start = 1.5
 	backdrop.show_behind_parent = true
+	backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(backdrop)
 	_tables = Settings.tables()
 	for i in _tables.size():
@@ -40,6 +50,9 @@ func _ready() -> void:
 		var p: String = t.dir + str(t.get("preview", "preview.png"))
 		if ResourceLoader.exists(p):
 			_previews[t.id] = load(p)
+		var p3 := _tex(str(t.dir) + "preview3d.png")
+		if p3:
+			_previews3d[t.id] = p3
 		if t.id == Settings.table_id:
 			_ti = i
 	get_viewport().size_changed.connect(_fit)
@@ -50,8 +63,38 @@ func _ready() -> void:
 			page = a.get_slice("=", 1)
 		elif a.begins_with("--menu-sel="):
 			sel = int(a.get_slice("=", 1))
+		elif a == "--menu-demo":   # recording hook: slide through the carousel by itself
+			_demo_steps = [1, 1, 1, -1, -1, -1]
 	if Settings.autostart:
 		_go.call_deferred()
+
+
+## Pre-rendered 3D preview (tools/make_preview3d.sh); falls back to the raw PNG until the
+## editor has imported it.
+func _tex(path: String) -> Texture2D:
+	if ResourceLoader.exists(path):
+		return load(path)
+	if FileAccess.file_exists(path):
+		var img := Image.load_from_file(ProjectSettings.globalize_path(path))
+		if img:
+			return ImageTexture.create_from_image(img)
+	return null
+
+
+func _preview(id) -> Texture2D:
+	if Settings.style == "modern" and Settings.view == "3d" and _previews3d.has(id):
+		return _previews3d[id]
+	return _previews.get(id)
+
+
+func _move(dir: int) -> void:
+	if _tables.size() < 2 or dir == 0:
+		return
+	_ti = (_ti + dir + _tables.size()) % _tables.size()
+	_slide = clampf(_slide + float(dir), -1.6, 1.6)
+	_slide_from = _slide
+	_slide_t = 0.0
+	_sting("menu_move", "flipper")
 
 
 func _fit() -> void:
@@ -109,10 +152,8 @@ func _activate(label: String, dir: int) -> void:
 	# dir: 0 = accept, -1 / +1 = left / right
 	match label:
 		"TABLE":
-			if dir != 0 and _tables.size() > 1:
-				_ti = (_ti + dir + _tables.size()) % _tables.size()
-				_slide = float(dir)
-				_sting("menu_move", "flipper")
+			if dir != 0:
+				_move(dir)
 			elif dir == 0:
 				_start()
 		"START":
@@ -124,8 +165,6 @@ func _activate(label: String, dir: int) -> void:
 		"HIGH SCORES":
 			if dir == 0:
 				_page("scores")
-			elif _tables.size() > 1:
-				_ti = (_ti + dir + _tables.size()) % _tables.size()
 		"QUIT":
 			if dir == 0:
 				get_tree().quit()
@@ -199,9 +238,17 @@ func _unhandled_input(event: InputEvent) -> void:
 		sel = (sel + 1) % items.size()
 		moved = true
 	elif event.is_action_pressed(&"ui_left") or event.is_action_pressed(&"flip_left"):
-		_activate(items[sel][0], -1)
+		if page == "main":
+			_move(-1)
+		else:
+			_activate(items[sel][0], -1)
 	elif event.is_action_pressed(&"ui_right") or event.is_action_pressed(&"flip_right"):
-		_activate(items[sel][0], 1)
+		if page == "main":
+			_move(1)
+		else:
+			_activate(items[sel][0], 1)
+	elif page == "main" and event.is_action_pressed(&"plunger") and not event.is_action(&"ui_down") and not event.is_action(&"ui_accept"):
+		_start()
 	elif event.is_action_pressed(&"back") or event.is_action_pressed(&"ui_cancel"):
 		if page == "main":
 			sel = items.size() - 1          # jump to QUIT, a second Esc quits
@@ -219,10 +266,54 @@ func _unhandled_input(event: InputEvent) -> void:
 	get_viewport().set_input_as_handled()
 
 
+## Mouse / touch (touch is emulated as mouse): click the centre card = play, a side card =
+## slide to it, drag / swipe left or right = next / previous table.
+func _gui_input(event: InputEvent) -> void:
+	if page != "main" or _tables.size() == 0:
+		return
+	if event is InputEventMouseButton and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT:
+		var mb := event as InputEventMouseButton
+		if mb.pressed and _car_rect.has_point(mb.position):
+			_drag = true
+			_drag_x0 = mb.position.x
+			_drag_moved = 0.0
+			accept_event()
+		elif not mb.pressed and _drag:
+			_drag = false
+			var dx := mb.position.x - _drag_x0
+			if absf(dx) > _card_w * 0.22:
+				_move(-1 if dx > 0.0 else 1)
+			elif _drag_moved < 12.0:
+				var cx := _car_rect.get_center().x
+				if absf(mb.position.x - cx) < _card_w * 0.55:
+					sel = 0
+					_start()
+				else:
+					_move(1 if mb.position.x > cx else -1)
+			else:
+				_slide_from = _slide
+				_slide_t = 0.0
+			accept_event()
+	elif event is InputEventMouseMotion and _drag:
+		var mm := event as InputEventMouseMotion
+		_drag_moved += absf(mm.relative.x)
+		_slide = clampf((mm.position.x - _drag_x0) / maxf(1.0, _card_w * 1.05), -0.9, 0.9)
+		_slide_t = 1.0
+		accept_event()
+
+
 func _process(delta: float) -> void:
 	_time += delta
+	if not _demo_steps.is_empty() and _time > 1.4 * (7 - _demo_steps.size()):
+		_move(_demo_steps.pop_front())
 	_idle = minf(_idle + delta, 0.0) if _idle < 0.0 else _idle
-	_slide = move_toward(_slide, 0.0, delta * 4.0)
+	if not _drag and _slide_t < 1.0:
+		_slide_t = minf(1.0, _slide_t + delta / 0.38)
+		var e := 1.0 - pow(1.0 - _slide_t, 3.0)        # ease-out cubic
+		_slide = _slide_from * (1.0 - e)
+		if _slide_t >= 1.0:
+			_slide = 0.0
+			Sound.play("rollover")
 	queue_redraw()
 
 
@@ -261,14 +352,13 @@ func _draw() -> void:
 	var prev_rect: Rect2
 	var menu_rect: Rect2
 	if landscape:
-		var pw := minf(area.size.y * 0.74 * 0.5, s.x * 0.36)
-		prev_rect = Rect2(s.x * 0.27 - pw * 0.5, area.size.y * 0.05, pw, pw * 2.0)
-		menu_rect = Rect2(s.x * 0.5, area.size.y * 0.04, s.x * 0.47, area.size.y * 0.94)
+		var cw := minf(s.x * 0.48, area.size.y * 1.6)   # M12_T2
+		prev_rect = Rect2(maxf(0.0, s.x * 0.5 - cw - s.x * 0.01), area.size.y * 0.03, cw, area.size.y * 0.95)
+		menu_rect = Rect2(s.x * 0.5 + s.x * 0.02, area.size.y * 0.04, minf(s.x * 0.45, area.size.y * 1.1), area.size.y * 0.94)
 	else:
-		var ph := area.size.y * 0.32
-		prev_rect = Rect2(s.x * 0.5 - ph * 0.25, area.size.y * 0.15, ph * 0.5, ph)
-		menu_rect = Rect2(s.x * 0.05, area.size.y * 0.62, s.x * 0.9, area.size.y * 0.38)
 		fs = int(clampf(s.x / 14.0, 26.0, 110.0))
+		prev_rect = Rect2(0, area.size.y * 0.135, s.x, area.size.y * 0.49)
+		menu_rect = Rect2(s.x * 0.05, area.size.y * 0.655, s.x * 0.9, area.size.y * 0.345)
 	# logo
 	var lk := minf(menu_rect.size.x * 0.9 / _logo.get_width(), area.size.y * (0.2 if landscape else 0.13) / _logo.get_height())
 	var lw := _logo.get_size() * lk
@@ -288,47 +378,154 @@ func _draw() -> void:
 
 
 func _draw_carousel(r: Rect2, fs: int) -> void:
+	# M12_CAROUSEL: centre card big (perspective-tilted table preview), neighbours smaller and
+	# dimmed left / right (wrap-around), eased slide, copper-bar glow behind the centre card,
+	# name + tagline + best score below in large high-contrast text.
+	_car_rect = r
 	var n := _tables.size()
+	if n == 0:
+		return
 	var on_table := page == "main" and sel == 0
-	# neighbours, small and dim, behind
+	var info_h := fs * 2.75
+	var ch := minf(r.size.y - info_h - fs * 0.4, r.size.x * 0.62 * 2.0)
+	var cw := ch * 0.5
+	_card_w = cw
+	var cy := r.position.y + fs * 0.2
+	var cx := r.get_center().x
+	var spacing := minf(cw * 1.3, r.size.x * 0.36)
+	_copper_glow(Rect2(cx - spacing * 1.25, cy - ch * 0.04, spacing * 2.5, ch * 1.08), absf(_slide))
+	# cards, far ones first
+	var order: Array = []
+	for i in n:
+		var rel := float(posmod(i - _ti + n / 2, n) - n / 2) + _slide
+		order.append([absf(rel), rel, i])
+	order.sort_custom(func(x, y): return x[0] > y[0])
+	for o in order:
+		var rel: float = o[1]
+		var ar := absf(rel)
+		if ar > 2.2:
+			continue
+		var k := lerpf(1.0, 0.64, minf(ar, 1.0)) - 0.18 * maxf(0.0, ar - 1.0)
+		var a := clampf(2.0 - ar, 0.0, 1.0)
+		var bright := lerpf(1.0, 0.42, minf(ar, 1.0))
+		var w := cw * k
+		var h := ch * k
+		var ccx := cx + rel * spacing
+		var top := cy + (ch - h) * 0.55
+		var t: Dictionary = _tables[o[2]]
+		_card(t, Rect2(ccx - w * 0.5, top, w, h), bright, a, ar < 0.5, on_table, fs, signf(rel) * minf(ar, 1.0))
+	# arrows
 	if n > 1:
-		for d in [-1, 1]:
-			var t: Dictionary = _tables[(_ti + d + n) % n]
-			var nr := Rect2(r.position + Vector2(d * r.size.x * 0.62 + r.size.x * 0.2, r.size.y * 0.1), r.size * 0.6)
-			var tex: Texture2D = _previews.get(t.id)
-			if tex:
-				draw_texture_rect(tex, nr, false, Color(0.45, 0.45, 0.55))
-			draw_rect(nr, Color(0.4, 0.4, 0.6), false, 3.0)
-	var t0 := _table()
-	var rr := Rect2(r.position + Vector2(_slide * r.size.x * 0.4, 0), r.size)
-	draw_rect(rr.grow(fs * 0.18), Color(0, 0, 0, 0.75))
-	var tex0: Texture2D = _previews.get(t0.id)
-	if tex0:
-		draw_texture_rect(tex0, rr, false)
-	else:
-		draw_rect(rr, Color(0.08, 0.05, 0.2))
-		_centered("NO PREVIEW", rr.get_center().x, rr.get_center().y, fs / 2, C_DIM)
-	if not bool(t0.get("playable", true)):
-		draw_rect(rr, Color(0, 0, 0, 0.55))
-		_centered("COMING SOON", rr.get_center().x, rr.get_center().y, fs, C_SEL)
-	var frame_col := C_SEL if on_table and fmod(_time, 0.6) < 0.4 else Color(0.85, 0.85, 1.0)
-	draw_rect(rr.grow(fs * 0.12), frame_col, false, maxf(4.0, fs * 0.1))
-	# name plate under the preview
-	var tname: String = str(t0.name)
-	var nfs := _fit_fs(tname, int(fs * 0.8), r.size.x * 1.5)
-	var ny := rr.end.y + fs * 0.25
-	draw_rect(Rect2(rr.get_center().x - r.size.x * 0.8, ny, r.size.x * 1.6, nfs * 1.35), Color(0, 0, 0, 0.8))
-	_centered(tname, rr.get_center().x, ny + nfs * 1.05, nfs, C_ACC)
-	if n > 1:
-		var afs := int(fs * 1.3)
-		var ay := rr.get_center().y + afs * 0.35
+		var afs := int(fs * 1.25)
+		var ay := cy + ch * 0.5 + afs * 0.35
 		var pulse := sin(_time * 6.0) * fs * 0.1
-		_text("<", Vector2(rr.position.x - afs * 0.9 - pulse, ay), afs, C_SEL if on_table else C_TXT)
-		_text(">", Vector2(rr.end.x + afs * 0.35 + pulse, ay), afs, C_SEL if on_table else C_TXT)
-		# dots: which table of how many
+		var acol := C_SEL if on_table else C_TXT
+		var ax := minf(spacing * 0.5 + cw * 0.5, r.size.x * 0.5 - afs * 0.2)
+		_text("<", Vector2(cx - ax - afs * 0.55 - pulse, ay), afs, acol)
+		_text(">", Vector2(cx + ax - afs * 0.05 + pulse, ay), afs, acol)
+	# info block
+	var t0 := _table()
+	var fade := clampf(1.0 - absf(_slide) * 1.4, 0.15, 1.0)
+	var iy := cy + ch + fs * 0.3
+	var bw := minf(r.size.x * 0.96, maxf(cw * 2.6, fs * 9.0))
+	draw_rect(Rect2(cx - bw * 0.5, iy, bw, info_h), Color(0, 0, 0, 0.82))
+	draw_rect(Rect2(cx - bw * 0.5, iy, bw, info_h), Color(C_ACC, 0.55), false, maxf(2.0, fs * 0.04))
+	var tname := str(t0.name)
+	var nfs := _fit_fs(tname, int(fs * 0.9), bw * 0.92)
+	_centered_a(tname, cx, iy + nfs * 1.02, nfs, C_ACC, fade)
+	var tag := str(t0.get("tagline", t0.get("subtitle", "")))
+	var tfs := _fit_fs(tag, int(fs * 0.58), bw * 0.94)
+	_centered_a(tag, cx, iy + fs * 1.62, tfs, C_TXT, fade)
+	var hs := Settings.scores_for(str(t0.id))
+	var best := "HIGH SCORE  " + (Util.fmt_score(int(hs[0][1])) + "  " + str(hs[0][0]) if hs.size() > 0 else "-")
+	var hfs := _fit_fs(best, int(fs * 0.62), bw * 0.94)
+	_centered_a(best, cx, iy + fs * 2.45, hfs, C_SEL, fade)
+	# dots
+	if n > 1:
 		for i in n:
-			var c := Vector2(rr.get_center().x + (i - (n - 1) * 0.5) * fs * 0.6, ny + nfs * 1.35 + fs * 0.45)
-			draw_circle(c, fs * 0.16, C_SEL if i == _ti else Color(0.5, 0.5, 0.6))
+			var c := Vector2(cx + (i - (n - 1) * 0.5) * fs * 0.6, iy + info_h + fs * 0.32)
+			draw_circle(c, fs * 0.15, C_SEL if i == _ti else Color(0.5, 0.5, 0.6))
+
+
+func _centered_a(text: String, cx: float, y: float, fs: int, col: Color, a: float) -> void:
+	var p := Vector2(cx - _tw(text, fs) * 0.5, y)
+	draw_string_outline(_font, p, text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, maxi(4, fs / 7), Color(0, 0, 0, a))
+	draw_string(_font, p, text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(col, a))
+
+
+## One carousel card: the preview drawn as a slightly tilted table (top edge narrower,
+## foreshortened) in horizontal strips, so the texture stays straight.
+func _card(t: Dictionary, rr: Rect2, bright: float, a: float, centre: bool, on_table: bool, fs: int, side: float) -> void:
+	var tilt := 0.13
+	var top_w := rr.size.x * (1.0 - tilt)
+	# side cards turn a little towards the centre: the outer edge is shorter
+	var sk := side * rr.size.y * 0.05
+	var quad := func(u: float, v: float) -> Vector2:
+		var f := v / (1.0 + 0.18 * (1.0 - v))           # foreshortened rows near the top
+		var wv := lerpf(top_w, rr.size.x, f)
+		var x := rr.get_center().x + (u - 0.5) * wv
+		var edge := (u - 0.5) * 2.0                       # -1 left .. 1 right
+		var y := rr.position.y + f * rr.size.y
+		y += sk * edge * (0.5 - f) * 0.9 * (1.0 if side != 0.0 else 0.0)
+		return Vector2(x, y)
+	var shadow := PackedVector2Array([quad.call(0.0, 0.0), quad.call(1.0, 0.0), quad.call(1.0, 1.0), quad.call(0.0, 1.0)])
+	var off := Vector2(fs * 0.14, fs * 0.22)
+	var sh := PackedVector2Array()
+	for v in shadow:
+		sh.append(v + off)
+	draw_colored_polygon(sh, Color(0, 0, 0, 0.55 * a))
+	var tex := _preview(t.id)
+	var col := Color(bright, bright, bright * 1.05, a)
+	var strips := 14
+	if tex:
+		for i in strips:
+			var v0 := float(i) / strips
+			var v1 := float(i + 1) / strips
+			var pts := PackedVector2Array([quad.call(0.0, v0), quad.call(1.0, v0), quad.call(1.0, v1), quad.call(0.0, v1)])
+			var uvs := PackedVector2Array([Vector2(0, v0), Vector2(1, v0), Vector2(1, v1), Vector2(0, v1)])
+			draw_polygon(pts, PackedColorArray([col, col, col, col]), uvs, tex)
+	else:
+		draw_colored_polygon(shadow, Color(0.08, 0.05, 0.2, a))
+		_centered("NO PREVIEW", rr.get_center().x, rr.get_center().y, fs / 2, C_DIM)
+	if not bool(t.get("playable", true)):
+		draw_colored_polygon(shadow, Color(0, 0, 0, 0.55 * a))
+		_centered("COMING SOON", rr.get_center().x, rr.get_center().y, fs, C_SEL)
+	var outline := PackedVector2Array([quad.call(0.0, 0.0), quad.call(1.0, 0.0), quad.call(1.0, 1.0), quad.call(0.0, 1.0), quad.call(0.0, 0.0)])
+	if centre:
+		var fc := C_SEL if on_table and fmod(_time, 0.6) < 0.4 else Color(0.9, 0.9, 1.0)
+		draw_polyline(outline, Color(0, 0, 0, 0.9), maxf(8.0, fs * 0.2))
+		draw_polyline(outline, fc, maxf(4.0, fs * 0.09))
+		# glass glint sweeping over the card
+		var g := fposmod(_time * 0.35, 1.6) - 0.3
+		if g > 0.0 and g < 1.0:
+			var gp := PackedVector2Array([quad.call(clampf(g - 0.08, 0, 1), 0.0), quad.call(clampf(g + 0.02, 0, 1), 0.0), quad.call(clampf(g - 0.18, 0, 1), 1.0), quad.call(clampf(g - 0.28, 0, 1), 1.0)])
+			draw_colored_polygon(gp, Color(1, 1, 1, 0.10))
+	else:
+		draw_polyline(outline, Color(0.45, 0.45, 0.65, a), 3.0)
+
+
+## Amiga copper bars behind the centre card: horizontal colour ramps scrolling on a sine,
+## fading out to the left and right.
+func _copper_glow(r: Rect2, motion: float) -> void:
+	var bars := 9
+	var bh := r.size.y / 11.0
+	var pal := [Color(0.35, 0.05, 0.0), Color(0.8, 0.25, 0.0), Color(1.0, 0.6, 0.1), Color(1.0, 0.95, 0.6), Color(1.0, 0.6, 0.1), Color(0.8, 0.25, 0.0), Color(0.35, 0.05, 0.0)]
+	var amp := 0.8 + 0.2 * minf(motion, 1.0)
+	for b in bars:
+		var hue := fposmod(b / float(bars) + _time * 0.05, 1.0)
+		var yc := r.position.y + r.size.y * (0.5 + 0.45 * sin(_time * 1.3 + b * 0.7))
+		for j in pal.size():
+			var c: Color = pal[j]
+			c = c.lerp(Color.from_hsv(hue, 0.85, c.v), 0.45)
+			var y := yc - bh * 0.5 + j * bh / pal.size()
+			var h := bh / pal.size() + 1.0
+			var cl := Color(c, 0.0)
+			var cm := Color(c, amp)
+			var x0 := r.position.x
+			var xm := r.get_center().x
+			var x1 := r.end.x
+			draw_polygon(PackedVector2Array([Vector2(x0, y), Vector2(xm, y), Vector2(xm, y + h), Vector2(x0, y + h)]), PackedColorArray([cl, cm, cm, cl]))
+			draw_polygon(PackedVector2Array([Vector2(xm, y), Vector2(x1, y), Vector2(x1, y + h), Vector2(xm, y + h)]), PackedColorArray([cm, cl, cl, cm]))
 
 
 func _draw_items(r: Rect2, fs: int) -> void:

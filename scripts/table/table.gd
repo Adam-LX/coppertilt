@@ -1712,20 +1712,34 @@ func _ball_look(b: Ball, delta: float, e: float, px: bool) -> void:
 				var axis := Vector3(-d.y, d.x, 0.0).normalized()
 				b.rot = (b.rot * Basis(axis, ang)).orthonormalized()
 	b.last = b.pos
-	# nearby flashers light the steel (also bumpers when they fire)
+	# M14_BALL: every nearby dynamic light mirrors in the steel: flashers (also the 3D light-show
+	# pulse), bumper lights (always glowing, brighter when they fire) and lit inserts
 	var cands: Array = []
 	for n in flash_lights:
 		var en: float = flash[n]
+		if t3d and t3d._flash.has(n):
+			en = maxf(en, (t3d._flash[n] as OmniLight3D).light_energy / 2.2)
 		if en > 0.02:
 			var l: PointLight2D = flash_lights[n]
 			var rel := l.position - b.pos
-			var w := en * 1.6 / (1.0 + rel.length_squared() / 9000.0)
-			cands.append([w, Vector3(rel.x, rel.y, 34.0), l.color])
+			var w := en * 2.6 / (1.0 + rel.length_squared() / 9000.0)
+			cands.append([w, Vector3(rel.x, rel.y, 26.0), l.color])
 	for i in g.bumpers.size():
-		if bumper_flash[i] > 0.02:
-			var rel := Vector2(g.bumpers[i][0], g.bumpers[i][1]) - b.pos
-			var w: float = bumper_flash[i] * 1.2 / (1.0 + rel.length_squared() / 3000.0)
-			cands.append([w, Vector3(rel.x, rel.y, 22.0), Color(1.0, 0.92, 0.7)])
+		var rel := Vector2(g.bumpers[i][0], g.bumpers[i][1]) - b.pos
+		var w: float = (0.22 + bumper_flash[i] * 1.2) / (1.0 + rel.length_squared() / 3000.0)
+		if w > 0.03:
+			cands.append([w, Vector3(rel.x, rel.y, 16.0), Color(1.0, 0.86, 0.62)])
+	for n in lamp_nodes:
+		var lv: float = lamp_level.get(n, 0.0)
+		if lv < 0.08:
+			continue
+		var lp: Array = light_pos[n].pos
+		var rel := Vector2(lp[0], lp[1]) - b.pos
+		var d2 := rel.length_squared()
+		if d2 > 6400.0:
+			continue
+		var w := lv * 0.75 / (1.0 + d2 / 1200.0)
+		cands.append([w, Vector3(rel.x, rel.y, 4.0), lamp_nodes[n][2]])
 	cands.sort_custom(func(a: Array, c: Array) -> bool: return a[0] > c[0])
 	if px:
 		# pixel style keeps its dithered sprite; flashers just tint it a little
@@ -1739,11 +1753,11 @@ func _ball_look(b: Ball, delta: float, e: float, px: bool) -> void:
 		return
 	var lp := PackedVector4Array()
 	var lc := PackedVector4Array()
-	for i in 4:
+	for i in 8:
 		if i < cands.size():
 			var c: Array = cands[i]
 			var col: Color = c[2]
-			var w: float = minf(float(c[0]), 1.6)
+			var w: float = minf(float(c[0]), 2.6)
 			lp.append(Vector4(c[1].x, c[1].y, c[1].z, 0.0))
 			lc.append(Vector4(col.r * w, col.g * w, col.b * w, 0.0))
 		else:
@@ -1756,11 +1770,11 @@ func _ball_look(b: Ball, delta: float, e: float, px: bool) -> void:
 	m.set_shader_parameter("lpos", lp)
 	m.set_shader_parameter("lcol", lc)
 	if b.contact:
-		# tight dark contact patch, slightly toward the shadow side; fades as the ball climbs
+		# tight dark contact patch, only directly under the ball contact point
 		var s := b.sprite.scale.x
-		b.contact.position = Vector2(0.6, 1.0) / s
-		b.contact.scale = Vector2.ONE * (11.0 / 128.0) / s * (1.0 + 0.4 * e)
-		b.contact.modulate.a = 0.85 * (1.0 - 0.6 * e)
+		b.contact.position = Vector2(0.3, 0.6) / s
+		b.contact.scale = Vector2.ONE * (3.5 / 128.0) / s * (1.0 + 0.3 * e)
+		b.contact.modulate.a = 0.75 * (1.0 - 0.7 * e)
 
 
 func _blink(rate := 4.0) -> bool:
