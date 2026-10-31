@@ -13,7 +13,7 @@ shader_type canvas_item;
 render_mode unshaded;
 
 uniform sampler2D pf : filter_linear;                   // playfield art (fallback)
-uniform sampler2D screen_tex : hint_screen_texture, filter_linear_mipmap;   // live table under ball
+uniform sampler2D screen_tex : hint_screen_texture, filter_linear;   // live table under ball
 uniform float live = 1.0;            // 1 = mirror live screen, 0 = static playfield art
 uniform vec2 table_size = vec2(320.0, 640.0);
 uniform vec2 ball_pos = vec2(0.0);
@@ -75,8 +75,8 @@ float spec_rays(vec3 rf_dir, vec3 L_dir, float spec_dot) {
 	}
 	float ang = atan(c.y, c.x);
 	// Sharp primary cross spikes + secondary 45-degree diagonal rays
-	float primary = pow(abs(cos(ang * 2.0)), 16.0);
-	float diagonal = pow(abs(cos(ang * 2.0 + 0.785398)), 16.0) * 0.45;
+	float primary = pow(max(abs(cos(ang * 2.0)), 1e-4), 16.0);
+	float diagonal = pow(max(abs(cos(ang * 2.0 + 0.785398)), 1e-4), 16.0) * 0.45;
 	float star = primary + diagonal;
 	float fade = exp(-len_c * 7.5) * smoothstep(0.72, 0.96, spec_dot);
 	return star * fade;
@@ -94,11 +94,13 @@ vec3 room_env(vec3 d) {
 
 	// Cabinet side rails (+/- x): dark polished mirror blades
 	float rails = smoothstep(0.45, 0.92, abs(d.x)) * (1.0 - smoothstep(0.4, 0.95, d.z));
-	vec3 rail_c = vec3(0.10, 0.11, 0.14) + vec3(0.40, 0.42, 0.50) * exp(-pow((abs(d.x) - 0.72) / 0.12, 2.0));
+	float rx = (abs(d.x) - 0.72) / 0.12;
+	vec3 rail_c = vec3(0.10, 0.11, 0.14) + vec3(0.40, 0.42, 0.50) * exp(-rx * rx);
 	c = mix(c, rail_c, rails * 0.80);
 
 	// Glass glare line along the horizon
-	float hz = exp(-pow(d.z / 0.10, 2.0)) * smoothstep(-0.3, 0.7, -d.y);
+	float rz = d.z / 0.10;
+	float hz = exp(-rz * rz) * smoothstep(-0.3, 0.7, -d.y);
 	c += vec3(0.92, 0.95, 1.0) * (hz * 0.28);
 
 	return c;
@@ -190,7 +192,10 @@ vec4 shade(vec2 p, float aa, vec2 sc, vec2 sk) {
 void fragment() {
 	vec2 q = (UV * 2.0 - 1.0) * quad;               // in ball radii
 	float aa = max(fwidth(q.x) * 1.5, 0.02);
-	vec2 sk = vec2(dFdx(SCREEN_UV.x) / dFdx(q.x), dFdy(SCREEN_UV.y) / dFdy(q.y)) / ball_r;
+	float dqx = dFdx(q.x);
+	float dqy = dFdy(q.y);
+	vec2 sk = vec2(abs(dqx) > 1e-6 ? dFdx(SCREEN_UV.x) / dqx : 0.0,
+			abs(dqy) > 1e-6 ? dFdy(SCREEN_UV.y) / dqy : 0.0) / ball_r;
 	vec2 sc = SCREEN_UV - q * ball_r * sk;
 	float sp = length(vel);
 	float bl = clamp(sp / 150.0 / ball_r - 0.35, 0.0, 0.7);
