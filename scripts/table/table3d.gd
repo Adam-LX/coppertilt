@@ -43,6 +43,7 @@ var _discs: Array = []        # Node3D per turntable
 var _ball_sh: Array = []      # shadow-only spheres
 var _flash: Dictionary = {}   # flasher name -> OmniLight3D
 var _inserts: Dictionary = {} # light name -> [OmniLight3D, colour]
+var _slings: Array = []       # OmniLight3D per slingshot
 var _ramp_mats: Array = []
 var _pf_tex: Texture2D
 var _owner: Texture2D
@@ -133,10 +134,10 @@ func _environment() -> void:
 	sky.sky_material = pm
 	env_lo.sky = sky
 	env_lo.tonemap_mode = Environment.TONE_MAPPER_LINEAR
-	env_lo.glow_intensity = 0.7
-	env_lo.glow_strength = 1.0
-	env_lo.glow_bloom = 0.0
-	env_lo.glow_hdr_threshold = 0.85
+	env_lo.glow_intensity = 0.75
+	env_lo.glow_strength = 1.05
+	env_lo.glow_bloom = 0.16
+	env_lo.glow_hdr_threshold = 0.88
 	env_lo.glow_blend_mode = Environment.GLOW_BLEND_MODE_SCREEN
 	env_lo.set_glow_level(0, 0.0)
 	env_lo.set_glow_level(1, 0.6)
@@ -200,6 +201,8 @@ func apply_options(sh: bool, fx: int) -> void:
 		_flash[n].visible = lightfx >= 1
 	for b in _bump:
 		b[2].visible = lightfx >= 1
+	for sl: OmniLight3D in _slings:
+		sl.visible = lightfx >= 1
 	for n in _inserts:
 		_inserts[n][0].visible = false
 	for s in _ball_sh:
@@ -215,9 +218,9 @@ func _mat(key: String) -> Material:
 	m.cull_mode = BaseMaterial3D.CULL_DISABLED
 	match key:
 		"chrome":
-			m.albedo_color = Color(0.78, 0.8, 0.86)
-			m.metallic = 0.92
-			m.roughness = 0.2
+			m.albedo_color = Color(0.82, 0.84, 0.90)
+			m.metallic = 0.95
+			m.roughness = 0.12
 		"dark":
 			m.albedo_color = Color(0.32, 0.3, 0.38)
 			m.metallic = 0.8
@@ -243,9 +246,9 @@ func _mat(key: String) -> Material:
 			m.albedo_color = Color(1.0, 0.82, 0.2)
 			m.roughness = 0.3
 		"gold":
-			m.albedo_color = Color(0.95, 0.72, 0.3)
-			m.metallic = 0.85
-			m.roughness = 0.25
+			m.albedo_color = Color(0.96, 0.76, 0.32)
+			m.metallic = 0.90
+			m.roughness = 0.15
 		"hole":
 			m.albedo_color = Color(0.05, 0.04, 0.08)
 			m.roughness = 0.6
@@ -497,6 +500,7 @@ func _build_posts() -> void:
 func _build_slings() -> void:
 	if not t.g.has("slings"):
 		return
+	_slings.clear()
 	for poly in t.g.slings:
 		var pts := PackedVector2Array()
 		for p in poly:
@@ -508,6 +512,15 @@ func _build_slings() -> void:
 		if Geometry2D.is_polygon_clockwise(ins):
 			ins.reverse()
 		_prism(_get_st("plastic", c), ins, 8.0, 9.0)
+		var sl := OmniLight3D.new()
+		sl.layers = 3
+		sl.position = Vector3(c.x, 10.0, c.y)
+		sl.omni_range = 55.0
+		sl.omni_attenuation = 1.3
+		sl.light_color = Color(1.0, 0.85, 0.98)
+		sl.light_energy = 0.0
+		root.add_child(sl)
+		_slings.append(sl)
 
 
 func _build_bumpers() -> void:
@@ -871,6 +884,10 @@ func update(delta: float) -> void:
 	for i in _targets.size():
 		var tf: float = t.target_flash[i] if i < t.target_flash.size() else 0.0
 		_targets[i].emission_energy_multiplier = tf * 2.5
+	for i in _slings.size():
+		var sf: float = float(t.sling_flash[i]) if i < t.sling_flash.size() else 0.0
+		_slings[i].light_energy = sf * 2.8
+		_slings[i].visible = lightfx >= 1 and sf > 0.01
 	for i in _discs.size():
 		_discs[i].rotation.y = -float(t.discs[i].a)
 	for m in _ramp_mats:

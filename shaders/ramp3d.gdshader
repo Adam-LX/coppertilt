@@ -38,9 +38,12 @@ void fragment() {
 void light() {
 	if (LIGHT_IS_DIRECTIONAL) {
 		DIFFUSE_LIGHT += vec3(1.0);
+		vec3 h = normalize(VIEW + LIGHT);
+		SPECULAR_LIGHT += vec3(1.0) * pow(max(dot(NORMAL, h), 0.0), 32.0) * 0.35;
 	} else {
 		vec3 c = LIGHT_COLOR * ATTENUATION / PI;
 		DIFFUSE_LIGHT += c * 0.8;
-		SPECULAR_LIGHT += c * 0.25;
+		vec3 h = normalize(VIEW + LIGHT);
+		SPECULAR_LIGHT += c * pow(max(dot(NORMAL, h), 0.0), 36.0) * 1.1;
 	}
 }
