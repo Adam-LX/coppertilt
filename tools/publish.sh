@@ -90,8 +90,9 @@ for f in sorted(os.listdir(".")):
 	(cd "$PUB/dist/windows" && python3 -c 'import sys,zipfile,os
 z=zipfile.ZipFile(sys.argv[1],"w",zipfile.ZIP_DEFLATED)
 for f in sorted(os.listdir(".")): z.write(f,"CopperTilt/"+f)' "$OUT/CopperTilt-windows-x86_64.zip")
+	cp "$PUB/dist/windows/CopperTilt.exe" "$OUT/CopperTilt.exe"
 	build_cli
-	(cd "$OUT" && sha256sum CopperTilt-* coppertilt_tty.pyz > SHA256SUMS)
+	(cd "$OUT" && sha256sum CopperTilt* coppertilt_tty.pyz > SHA256SUMS)
 	ls -la "$OUT"
 }
 
@@ -150,7 +151,7 @@ push() {
 
 release() {
 	local slug="$GH_USER/$REL_REPO" a=()
-	mapfile -t a < <(ls "$OUT"/CopperTilt-* "$OUT"/coppertilt_tty.pyz "$OUT"/SHA256SUMS)
+	mapfile -t a < <(ls "$OUT"/CopperTilt* "$OUT"/coppertilt_tty.pyz "$OUT"/SHA256SUMS)
 	gh_ repo view "$slug" >/dev/null 2>&1 || gh_ repo create "$slug" --public \
 		--description "Copper Tilt — binaria (Windows / Linux) + wersja terminalowa"
 	local rr="$PUB/rel-repo"

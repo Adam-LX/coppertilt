@@ -36,6 +36,7 @@ common/max_physics_steps_per_frame=12
 
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
+gl_compatibility/fallback_to_angle=true
 limits/opengl/max_renderable_lights=256
 limits/opengl/max_lights_per_object=16
 environment/defaults/default_clear_color=Color(0.02, 0.0, 0.06, 1)
