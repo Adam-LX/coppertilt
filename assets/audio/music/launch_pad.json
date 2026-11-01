@@ -1,0 +1,32 @@
+{
+ "section": "main",
+ "title": "Launch Pad",
+ "profile": "pinball-table",
+ "rate": 44100,
+ "speed": 6,
+ "tempo": 130,
+ "bpm": 130.0,
+ "bar_s": 1.846154,
+ "loop": true,
+ "loop_offset_samples": 325661,
+ "loop_offset": 7.384603,
+ "loop_len_s": 51.692,
+ "length_s": 59.077,
+ "bars": 32.0,
+ "tempo_changes": [
+  [
+   6,
+   130
+  ]
+ ],
+ "lufs": -14.0,
+ "true_peak_dbtp": -4.06,
+ "seam": {
+  "jump": 0.0306,
+  "p999": 0.2304,
+  "ratio": 0.133,
+  "rms_jump_db": 5.97,
+  "verdict": "OK"
+ },
+ "file": "launch_pad.ogg"
+}

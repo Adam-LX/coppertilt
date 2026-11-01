@@ -1,0 +1,32 @@
+{
+ "section": "main",
+ "title": "Copper Speedway",
+ "profile": "pinball-table",
+ "rate": 44100,
+ "speed": 6,
+ "tempo": 140,
+ "bpm": 140.0,
+ "bar_s": 1.714286,
+ "loop": true,
+ "loop_offset_samples": 302400,
+ "loop_offset": 6.857143,
+ "loop_len_s": 48.0,
+ "length_s": 54.857,
+ "bars": 32.0,
+ "tempo_changes": [
+  [
+   6,
+   140
+  ]
+ ],
+ "lufs": -14.0,
+ "true_peak_dbtp": -2.49,
+ "seam": {
+  "jump": 0.0126,
+  "p999": 0.2546,
+  "ratio": 0.05,
+  "rms_jump_db": 0.6,
+  "verdict": "OK"
+ },
+ "file": "copper_speedway.ogg"
+}

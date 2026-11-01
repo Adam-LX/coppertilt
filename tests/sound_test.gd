@@ -50,6 +50,18 @@ func _ready() -> void:
 	_check(Sound._duck_until > Sound._time, "musical stinger ducks the music")
 	Sound.play_stinger("menu_move")
 
+	# voice callouts
+	const VOICES := ["skill_shot", "super_skill_shot", "extra_ball", "extra_ball_lit",
+		"jackpot", "super_jackpot", "multiball", "lock_lit", "ball_locked", "hurry_up",
+		"shoot_again", "video_mode", "game_over", "tilt_warning", "tilted", "kickback",
+		"combo", "super_combo", "start_midnight_funfair", "start_copper_speedway", "start_launch_pad"]
+	for v in VOICES:
+		_check(Sound.has_voice(v), "voice " + v)
+	_check(not Sound.has_voice("no_such_voice"), "missing voice reported missing")
+	Sound.play_voice("skill_shot")
+	await get_tree().process_frame
+	_check(Sound._duck_until > Sound._time, "voice callout ducks the music")
+
 	# menu: title intro, then the unreal-profile menu theme; HIGH SCORES page -> hiscore
 	var menu := FakeMenu.new()
 	add_child(menu)

@@ -1,6 +1,6 @@
 {
  "section": "action",
- "title": "Midnight Funfair – menu",
+ "title": "Nocne Wesołe Miasteczko – menu",
  "profile": "unreal",
  "rate": 44100,
  "speed": 6,
@@ -28,5 +28,5 @@
   "rms_jump_db": 7.0,
   "verdict": "OK"
  },
- "file": "menu_action.ogg"
+ "file": "hiscore.ogg"
 }

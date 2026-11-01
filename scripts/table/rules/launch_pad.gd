@@ -7,6 +7,7 @@ extends "res://scripts/table/rules/table_rules.gd"
 
 var count_n := 0     # T-MINUS countdown progress (liftoff shots)
 var orbit_n := 0
+var video_mode_lit := false
 
 
 func shots() -> Array:
@@ -23,11 +24,14 @@ func flashers() -> Dictionary:
 func reset_game() -> void:
 	count_n = 0
 	orbit_n = 0
+	video_mode_lit = false
 
 
 func on_bumper(bi: int, _b) -> void:
 	t.flash["top" if bi < 3 else "nest"] = 1.0
 	t._score(100)
+	if randf() < 0.35:
+		Sound.play("plasma_shield", randf_range(0.9, 1.15), -4.0)
 	if t.bumper_hits % 50 == 0:
 		t._score(50000)
 		say("SOLAR FLARE 50,000", "bonus", "sparkle")
@@ -57,15 +61,27 @@ func on_drop(_i: int) -> void:
 	t._score(2500)
 
 
+func on_spinner() -> void:
+	super.on_spinner()
+	if randf() < 0.3:
+		Sound.play("telemetry_chirp", randf_range(0.9, 1.2), -6.0)
+
+
 func on_bank(bank: String) -> void:
 	if bank == "stage":
 		t._score(25000)
 		t.lock_lit = true
-		t.announce.emit("STAGE SEPARATION - LOCK LIT", "jackpot")
-		t.dmd_anim.emit("rocket", "LOCK IS LIT")
+		video_mode_lit = true
+		Sound.play("plasma_shield", 1.05)
+		Sound.play("countdown_beep", 1.3, -4.0)
+		Sound.play_voice("stage_separation")
+		t.announce.emit("LUNAR LANDER LIT - SHOOT SILO", "jackpot")
+		t.dmd_anim.emit("saturn_liftoff", "LANDER LIT")
 	else:
 		t._score(20000)
 		bump_multiplier("FUEL 25,000")
+		Sound.play("telemetry_chirp", 1.1)
+		Sound.play_voice("t_minus_zero")
 		t.announce.emit("PAD CLEARED", "jackpot")
 
 
@@ -89,16 +105,24 @@ func on_orbit(name: String) -> void:
 	if orbit_n % 4 == 0:
 		t.extra_lit = true
 		say("EXTRA BALL IS LIT", "bonus", "sparkle", "EXTRA BALL LIT")
+	elif orbit_n % 4 == 2:
+		Sound.play_voice("solar_flare")
+		say("ORBIT TRAJECTORY", "bonus", "radar_sweep")
 	else:
-		t.announce.emit("ORBIT 5,000", "")
+		say("ORBIT TRAJECTORY", "bonus", "radar_sweep")
 
 
 func on_hole(b, hn: String) -> void:
 	match hn:
 		"silo":
 			b.sprite.visible = false
+			if video_mode_lit and not t.tilted:
+				video_mode_lit = false
+				b.held = 22.0
+				t.video_mode_start.emit("lunar_lander")
+				return
 			t._score(15000 * t.multiplier)
-			say("FUEL SILO", "bonus", "sparkle")
+			say("FUEL SILO", "bonus", "saturn_liftoff")
 		"hangar":
 			b.sprite.visible = false
 			if t.lock_lit and not t.multiball and not t.tilted:
@@ -149,9 +173,15 @@ func on_ramp(_ri: int, name: String) -> void:
 	if name == "liftoff":
 		count_n += 1
 		t._score(25000 * t.multiplier)
+		Sound.play("countdown_beep", 0.9 + (count_n % 5) * 0.1, -1.0)
 		if count_n % 5 == 0:
 			t.extra_lit = true
-			say("LIFTOFF - EXTRA BALL LIT", "jackpot", "rocket", "EXTRA BALL LIT")
+			Sound.play_voice("t_minus_zero")
+			say("LIFTOFF - EXTRA BALL LIT", "jackpot", "saturn_liftoff", "EXTRA BALL LIT")
+		elif count_n % 3 == 0:
+			video_mode_lit = true
+			Sound.play_voice("stage_separation")
+			say("LUNAR LANDER LIT - SHOOT SILO", "bonus", "stage_sep", "VIDEO MODE")
 		else:
 			say("T-MINUS %d" % (5 - count_n % 5), "bonus", "rocket")
 		return

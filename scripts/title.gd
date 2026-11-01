@@ -19,6 +19,7 @@ var _art: Texture2D = preload("res://assets/art/title_art.png")
 var _logo: Texture2D = preload("res://assets/art/logo.png")
 var _tables: Array = []
 var _previews: Dictionary = {}
+var _panoramas: Dictionary = {}
 var _ti := 0                   # selected table
 var _slide := 0.0              # M12_CAROUSEL: slide offset in card units (0 = settled)
 var _slide_from := 0.0         # offset at the start of the eased slide
@@ -40,7 +41,9 @@ func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	_font = ThemeDB.fallback_font
 	backdrop = CopperBackdrop.new()
+	backdrop.panorama = _art
 	backdrop.floor_start = 1.5
+	backdrop.brightness = 0.90
 	backdrop.show_behind_parent = true
 	backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(backdrop)
@@ -53,8 +56,13 @@ func _ready() -> void:
 		var p3 := _tex(str(t.dir) + "preview3d.png")
 		if p3:
 			_previews3d[t.id] = p3
+		var pano_p := str(t.dir) + str(t.get("panorama", "panorama.png"))
+		var pano_tex := _tex(pano_p)
+		if pano_tex:
+			_panoramas[t.id] = pano_tex
 		if t.id == Settings.table_id:
 			_ti = i
+	_update_backdrop()
 	get_viewport().size_changed.connect(_fit)
 	_fit()
 	Sound.play_music("title")
@@ -94,12 +102,31 @@ func _move(dir: int) -> void:
 	_slide = clampf(_slide + float(dir), -1.6, 1.6)
 	_slide_from = _slide
 	_slide_t = 0.0
+	_update_backdrop()
 	_sting("menu_move", "flipper")
+
+
+func _update_backdrop() -> void:
+	if not backdrop:
+		return
+	var tid := str(_table().get("id", "midnight_funfair"))
+	if _panoramas.has(tid):
+		backdrop.panorama = _panoramas[tid]
+	else:
+		backdrop.panorama = _art
+	var th := 0
+	if tid == "launch_pad":
+		th = 1
+	elif tid == "copper_speedway":
+		th = 2
+	backdrop.theme_idx = th
+	backdrop._sync()
 
 
 func _fit() -> void:
 	backdrop.position = Vector2.ZERO
 	backdrop.size = get_viewport_rect().size
+	backdrop._sync()
 
 
 func _sting(n: String, fallback := "") -> void:
@@ -340,11 +367,8 @@ func _fit_fs(text: String, fs: int, max_w: float) -> int:
 
 func _draw() -> void:
 	var s := size
-	# painted panorama behind everything, darkened for contrast
-	var ak := maxf(s.y / _art.get_height(), s.x / _art.get_width())
-	var aw := _art.get_size() * ak
-	draw_texture_rect(_art, Rect2((s - aw) * 0.5, aw), false)
-	draw_rect(Rect2(Vector2.ZERO, s), Color(0, 0, 0.06, 0.45))
+	# Animated midnight funfair backdrop (copper bars, sweeping searchlights, starfield, neon pulse)
+	# is rendered behind parent by backdrop (CopperBackdrop).
 	var landscape := s.x >= s.y * 1.15
 	var fs := int(clampf(s.y / 15.0, 26.0, 120.0))
 	var scroll_h := clampf(s.y / 9.0, 50.0, 150.0)

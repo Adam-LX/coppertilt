@@ -23,6 +23,7 @@ signal launched
 signal tilt_changed(level: float, is_tilted: bool)
 signal extra_ball
 signal save_request(seconds: float)   # M11_MODES: ball save when a mode starts
+signal video_mode_start(id: String)
 
 const W := 320.0
 const H := 640.0

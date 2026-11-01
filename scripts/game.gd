@@ -49,6 +49,8 @@ var cam: Camera2D
 var strip_bg: ColorRect
 var strip_line: ColorRect
 var dmd: DotMatrix
+const VideoModesScript := preload("res://scripts/ui/video_modes.gd")
+var video_modes = VideoModesScript.new()
 
 var score := 0
 var ball_no := 1
@@ -134,12 +136,11 @@ func _ready() -> void:
 	cam.make_current()
 
 	strip_bg = ColorRect.new()
-	strip_bg.color = Color(0.05, 0.02, 0.04)
-	add_child(strip_bg)
 	strip_line = ColorRect.new()
-	strip_line.color = Color(0.78, 0.72, 0.85)
-	add_child(strip_line)
 	dmd = DotMatrix.new()
+	_apply_table_theme()
+	add_child(strip_bg)
+	add_child(strip_line)
 	add_child(dmd)
 
 	table.scored.connect(_on_scored)
@@ -151,6 +152,8 @@ func _ready() -> void:
 	table.save_request.connect(func(sec: float) -> void:   # M11_MODES
 		if state == "play":
 			ball_save = maxf(ball_save, sec))
+	table.video_mode_start.connect(start_video_mode)
+	video_modes.finished.connect(_on_video_mode_finished)
 
 	get_viewport().size_changed.connect(_layout)
 	Settings.changed.connect(_layout)
@@ -223,6 +226,26 @@ func _layout() -> void:
 	_cam_y = clampf(_cam_y, _view_h * 0.5, PinTable.H - _view_h * 0.5)
 
 
+func _apply_table_theme() -> void:
+	if not dmd or not strip_bg or not strip_line:
+		return
+	if TABLE_ID == "launch_pad":
+		dmd.lit_color = Color(0.25, 0.92, 1.0)
+		dmd.off_color = Color(0.02, 0.08, 0.12)
+		strip_bg.color = Color(0.02, 0.04, 0.08)
+		strip_line.color = Color(0.25, 0.75, 0.95)
+	elif TABLE_ID == "copper_speedway":
+		dmd.lit_color = Color(1.0, 0.35, 0.08)
+		dmd.off_color = Color(0.12, 0.03, 0.01)
+		strip_bg.color = Color(0.06, 0.03, 0.02)
+		strip_line.color = Color(0.95, 0.55, 0.20)
+	else:
+		dmd.lit_color = Color(1.0, 0.55, 0.10)
+		dmd.off_color = Color(0.13, 0.045, 0.02)
+		strip_bg.color = Color(0.05, 0.02, 0.04)
+		strip_line.color = Color(0.78, 0.72, 0.85)
+
+
 ## Music of this table through the audio manager (table.json "music"); tables whose track is not
 ## rendered yet play the Funfair theme instead of silence.
 func _table_music() -> String:
@@ -279,6 +302,9 @@ func _start_game() -> void:
 	_bumpers_at_ball = 0
 	_ramps_at_ball = 0
 	_say("BALL 1", "start")
+	var start_call := "start_" + Settings.table_id
+	if Sound.has_voice(start_call):
+		Sound.play_voice(start_call)
 
 
 func _on_scored(points: int) -> void:
@@ -293,6 +319,28 @@ func _say(text: String, sfx := "") -> void:
 	_msg_t = 1.8
 	if sfx != "":
 		Sound.play(sfx)
+	_play_voice_for_msg(text)
+
+
+func _play_voice_for_msg(text: String) -> void:
+	if text.begins_with("SUPER JACKPOT"):
+		Sound.play_voice("super_jackpot")
+	elif text == "JACKPOT" or text.begins_with("JACKPOT "):
+		Sound.play_voice("jackpot")
+	elif text.begins_with("EXTRA BALL IS LIT") or text == "EXTRA BALL LIT":
+		Sound.play_voice("extra_ball_lit")
+	elif text == "EXTRA BALL":
+		Sound.play_voice("extra_ball")
+	elif text == "TILT":
+		Sound.play_voice("tilted")
+	elif text == "DANGER":
+		Sound.play_voice("tilt_warning")
+	elif text == "KICKBACK" or text.ends_with("- KICKBACK"):
+		Sound.play_voice("kickback")
+	elif text.begins_with("LOCK IS LIT") or text.ends_with("LOCK LIT"):
+		Sound.play_voice("lock_lit")
+	elif text == "BALL LOCKED" or text.begins_with("BALL 1 LOCKED") or text.begins_with("CAR 1 ON THE GRID"):
+		Sound.play_voice("ball_locked")
 
 
 func _on_anim(kind: String, text: String) -> void:
@@ -312,6 +360,7 @@ func _on_drained() -> void:
 	if ball_save > 0.0 and not table.tilted:
 		ball_save = 0.0
 		_say("BALL SAVED", "save")
+		Sound.play_voice("shoot_again")
 		table.reset_ball()
 		return
 	state = "drain"
@@ -325,6 +374,7 @@ func _on_drained() -> void:
 		_extra -= 1
 		ball_no -= 1
 		_say("BONUS %s - SHOOT AGAIN" % Util.fmt_score(bonus))
+		Sound.play_voice("shoot_again")
 	else:
 		_say("BONUS %s" % Util.fmt_score(bonus))
 	_msg_t = 2.2
@@ -368,6 +418,19 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"back"):
 		get_tree().paused = false
 		get_tree().change_scene_to_file("res://scenes/title.tscn")
+	elif video_modes.active:
+		if event.is_action_pressed(&"flip_left"):
+			video_modes.handle_input("left")
+		elif event.is_action_pressed(&"flip_right"):
+			video_modes.handle_input("right")
+		elif event.is_action_pressed(&"plunger") or event.is_action_pressed(&"start"):
+			video_modes.handle_input("action")
+		elif event.is_action_released(&"flip_left"):
+			video_modes.handle_input_release("left")
+		elif event.is_action_released(&"flip_right"):
+			video_modes.handle_input_release("right")
+		elif event.is_action_released(&"plunger") or event.is_action_released(&"start"):
+			video_modes.handle_input_release("action")
 	elif state == "entry":
 		if event is InputEventKey and event.pressed and not event.echo:
 			var k := OS.get_keycode_string((event as InputEventKey).physical_keycode)
@@ -455,6 +518,9 @@ func _update_camera(delta: float) -> void:
 # --- DMD ---------------------------------------------------------------------------
 
 func _draw_dmd(delta: float) -> void:
+	if video_modes.active:
+		video_modes.update(delta, dmd)
+		return
 	var d := dmd
 	d.clear()
 	var c := d.cols
@@ -508,6 +574,34 @@ func _draw_dmd(delta: float) -> void:
 
 
 ## Centred text, 2x when it fits, else 1x.
+func start_video_mode(id: String) -> void:
+	if video_modes.active:
+		return
+	video_modes.start(id)
+	Sound.play_stinger("menu_start")
+	Sound.play_voice("video_mode")
+	_say("VIDEO MODE", "start")
+
+
+func _on_video_mode_finished(vm_score: int, award_type: String, award_text: String) -> void:
+	score += vm_score
+	if award_type == "extra_ball":
+		_extra = mini(_extra + 1, int(rules.max_extra_balls))
+		table.extra_ball.emit()
+		Sound.play_voice("extra_ball")
+	elif vm_score > 0:
+		if video_modes.current_id == "duck_hunt":
+			Sound.play_voice("carnival_complete")
+		elif video_modes.current_id == "redline_overtake":
+			Sound.play_voice("turbo_boost")
+		elif video_modes.current_id == "lunar_lander":
+			Sound.play_voice("eagle_landed")
+	_say(award_text, "jackpot")
+	for b in table.balls:
+		if b.held > 0.0:
+			b.held = 0.2
+
+
 func _big_or_small(t: String, x: int, v: int) -> void:
 	var s := 2 if dmd.text_width(t, 2) <= dmd.cols - 4 else 1
 	var y := 1 if s == 2 else 4
@@ -599,6 +693,130 @@ func _draw_anim(delta: float) -> void:
 				d.dot(cx + 3, cy + 2 - k * 7, 255)
 			if p > 0.3:
 				_big_or_small(_anim_text, mid, 255 if fmod(_time, 0.3) < 0.2 else 140)
+		"circus":
+			# Juggler clown with bouncing balls on parabolic arcs
+			var jx := 18
+			d.circle(jx, 9, 3, 200)
+			d.dot(jx, 5, 255)
+			d.line(jx - 3, 4, jx + 3, 4, 255)
+			d.line(jx - 5, 11, jx + 5, 11, 180)
+			for i in 3:
+				var phase := _time * 5.0 + i * TAU / 3.0
+				var bx := jx + int(cos(phase) * 12.0)
+				var by := 8 - int(absf(sin(phase)) * 7.0)
+				d.circle(bx, by, 1, 255)
+			_big_or_small(_anim_text, mid + 12, 255)
+		"ghost":
+			# Floating spooky ghost with wavy tail and blinking eyes
+			var gx := int(p * (c + 20)) - 10
+			var gy := 6 + int(sin(_time * 4.0) * 3.0)
+			d.circle(gx, gy, 4, 220)
+			d.rect(gx - 4, gy, 9, 5, 220)
+			d.dot(gx - 2, gy - 1, 0)
+			d.dot(gx + 2, gy - 1, 0)
+			for xx in range(gx - 4, gx + 5):
+				if (xx + int(_time * 8.0)) % 2 == 0:
+					d.dot(xx, gy + 5, 220)
+			_big_or_small(_anim_text, mid, 255 if p > 0.3 else 120)
+		"burnout":
+			# Racing car spinning tires with huge smoke puffs and flame exhaust
+			var car_x := int(lerpf(-20.0, float(mid - 15), minf(1.0, p * 2.5)))
+			if p > 0.7:
+				car_x += int((p - 0.7) * 220.0)
+			var cy := rows - 5
+			d.rect(car_x, cy - 3, 14, 5, 255)
+			d.rect(car_x + 3, cy - 6, 7, 3, 220)
+			d.circle(car_x + 2, cy + 2, 2, 255)
+			d.circle(car_x + 11, cy + 2, 2, 255)
+			for s in 8:
+				var sx := car_x - 3 - int(randf() * 12.0)
+				var sy := cy + 1 - int(randf() * 8.0)
+				if sx >= 0 and sy >= 0:
+					d.dot(sx, sy, int(randf_range(100, 255)))
+			_big_or_small(_anim_text, mid, 255 if fmod(_time, 0.2) < 0.1 else 150)
+		"drag_tree":
+			# Staging lights countdown (amber 1, amber 2, amber 3, green light!)
+			var tx := 14
+			d.line(tx, 1, tx, rows - 1, 100)
+			d.dot(tx - 2, 2, 255)
+			d.dot(tx + 2, 2, 255)
+			var amber_step := int(p * 5.0)
+			if amber_step >= 1:
+				d.circle(tx - 3, 5, 1, 240)
+				d.circle(tx + 3, 5, 1, 240)
+			if amber_step >= 2:
+				d.circle(tx - 3, 8, 1, 240)
+				d.circle(tx + 3, 8, 1, 240)
+			if amber_step >= 3:
+				d.circle(tx - 3, 11, 1, 240)
+				d.circle(tx + 3, 11, 1, 240)
+			if amber_step >= 4:
+				d.circle(tx, 14, 2, 255)
+			_big_or_small(_anim_text, mid + 10, 255 if amber_step >= 4 else 180)
+		"pit_stop":
+			# Racing crew changing tires with sparks
+			var car_x := mid - 12
+			var cy := rows - 6
+			d.rect(car_x, cy - 2, 24, 5, 240)
+			d.circle(car_x + 4, cy + 3, 2, 255)
+			d.circle(car_x + 19, cy + 3, 2, 255)
+			# Pit crew figures
+			d.circle(car_x + 4, cy - 5, 2, 200)
+			d.circle(car_x + 19, cy - 5, 2, 200)
+			if fmod(_time, 0.15) < 0.08:
+				_spark(delta, 3)
+			_big_or_small(_anim_text, mid, 255)
+		"flag_wave":
+			# Checkered flag waving animation
+			for x in c:
+				var wave_y := int(round(sin(x * 0.15 + _time * 8.0) * 2.0))
+				for y in range(2, 14):
+					var k := ((x / 4) + ((y + wave_y) / 3)) % 2 == 0
+					d.dot(x, y + wave_y, 255 if k else 30)
+			_big_or_small(_anim_text, mid, 255)
+		"saturn_liftoff":
+			# Saturn rocket blast off with billowing flame & smoke
+			var rx := mid
+			var ry := int(lerpf(float(rows - 10), -16.0, p))
+			d.line(rx - 8, 2, rx - 8, rows - 1, 140)
+			if p < 0.3:
+				d.line(rx - 8, ry + 4, rx - 2, ry + 4, 200)
+			d.rect(rx - 2, ry, 5, 10, 255)
+			d.line(rx - 4, ry + 8, rx + 4, ry + 8, 255)
+			for k in 14:
+				var ex := rx - 14 + int(randf() * 29.0)
+				var ey := rows - 1 - int(randf() * 6.0)
+				d.dot(ex, ey, int(randf_range(120, 255)))
+			_big_or_small(_anim_text, mid, 255 if p > 0.4 else 100)
+		"stage_sep":
+			# Booster stage separation with cold gas puffs
+			var rx := mid
+			d.rect(rx - 2, 3, 5, 8, 255) # 2nd stage
+			var sep_off := int(p * 18.0)
+			d.line(rx - 5 - sep_off, 7, rx - 5 - sep_off, 14, 200) # booster 1
+			d.line(rx + 5 + sep_off, 7, rx + 5 + sep_off, 14, 200) # booster 2
+			_big_or_small(_anim_text, mid, 255)
+		"radar_sweep":
+			# Circular sweep with blip
+			var rx := 16
+			var ry := 8
+			d.circle(rx, ry, 7, 100)
+			var ang: float = _time * 8.0
+			var sx := rx + int(cos(ang) * 6.0)
+			var sy := ry + int(sin(ang) * 6.0)
+			d.line(rx, ry, sx, sy, 255)
+			d.dot(rx + 3, ry - 3, 255 if fmod(_time, 0.3) < 0.2 else 0)
+			_big_or_small(_anim_text, mid + 12, 255)
+		"spacewalk":
+			# Floating tethered astronaut waving
+			var ax := int(p * (c - 40)) + 10
+			var ay := 7 + int(sin(_time * 3.0) * 3.0)
+			d.line(0, rows - 1, ax - 4, ay + 2, 80)
+			d.circle(ax, ay - 2, 2, 255)
+			d.rect(ax - 2, ay + 1, 5, 4, 220)
+			d.rect(ax - 4, ay, 2, 5, 160)
+			d.line(ax + 3, ay, ax + 5, ay - 2, 255)
+			_big_or_small(_anim_text, mid + 15, 255)
 		_:
 			_big_or_small(_anim_text, mid, 255)
 
@@ -691,6 +909,7 @@ func _begin_game_over() -> void:
 	table.input_enabled = false
 	_sparks.clear()
 	_sting("game_over", "tilt")
+	Sound.play_voice("game_over")
 
 
 func _begin_final() -> void:

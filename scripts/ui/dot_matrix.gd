@@ -78,6 +78,60 @@ func dot(x: int, y: int, v := 255) -> void:
 		buf[i] = maxi(buf[i], v)
 
 
+func line(x0: int, y0: int, x1: int, y1: int, v := 255) -> void:
+	var dx := absi(x1 - x0)
+	var sx := 1 if x0 < x1 else -1
+	var dy := -absi(y1 - y0)
+	var sy := 1 if y0 < y1 else -1
+	var err := dx + dy
+	while true:
+		dot(x0, y0, v)
+		if x0 == x1 and y0 == y1:
+			break
+		var e2 := 2 * err
+		if e2 >= dy:
+			err += dy
+			x0 += sx
+		if e2 <= dx:
+			err += dx
+			y0 += sy
+
+
+func rect(x: int, y: int, w: int, h: int, v := 255, fill := true) -> void:
+	if fill:
+		for yy in range(y, y + h):
+			for xx in range(x, x + w):
+				dot(xx, yy, v)
+	else:
+		for xx in range(x, x + w):
+			dot(xx, y, v)
+			dot(xx, y + h - 1, v)
+		for yy in range(y, y + h):
+			dot(x, yy, v)
+			dot(x + w - 1, yy, v)
+
+
+func circle(cx: int, cy: int, r: int, v := 255, fill := false) -> void:
+	for dy in range(-r, r + 1):
+		for dx in range(-r, r + 1):
+			var d2 := dx * dx + dy * dy
+			if fill:
+				if d2 <= r * r:
+					dot(cx + dx, cy + dy, v)
+			else:
+				if d2 <= r * r and d2 >= (r - 1) * (r - 1):
+					dot(cx + dx, cy + dy, v)
+
+
+func sprite(x: int, y: int, pattern: Array, v := 255) -> void:
+	for ry in pattern.size():
+		var row: String = str(pattern[ry])
+		for rx in row.length():
+			var ch := row[rx]
+			if ch != " " and ch != "0" and ch != ".":
+				dot(x + rx, y + ry, v)
+
+
 func text_width(t: String, s := 1) -> int:
 	return maxi(0, t.length() * 6 * s - s)
 

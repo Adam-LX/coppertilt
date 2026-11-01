@@ -147,6 +147,18 @@ def make_sfx():
     s["jackpot"] = cat(arp(up, 0.05, "square", 0.45), arp(up[::-1], 0.05, "square", 0.4),
                        arp(up, 0.05, "saw", 0.4), tone(0.4, mtof(93), None, "square", 0.45, power=1.3))
     s["save"] = arp([mtof(m) for m in (76, 81, 88)], 0.07, "tri", 0.6)
+    # Table-specific SFX:
+    # Launch Pad
+    s["launch_launch_pad"] = mix(noise(0.65, 0.85, 0.02, 1.0, power=1.8), tone(0.6, 65, 520, "saw", 0.45, power=1.4))
+    s["bumper_launch_pad"] = mix(tone(0.18, 1800, 320, "tri", 0.55), tone(0.12, 440, 110, "square", 0.35, duty=0.2), noise(0.04, 0.3, 0.8))
+    s["jackpot_launch_pad"] = cat(arp([mtof(m) for m in (62, 65, 69, 74, 77, 81)], 0.06, "saw", 0.45),
+                                  arp([mtof(m) for m in (81, 77, 74, 86)], 0.07, "square", 0.5))
+    # Copper Speedway
+    s["launch_copper_speedway"] = mix(noise(0.45, 0.9, 0.05, 0.7, power=1.2), tone(0.5, 320, 880, "saw", 0.5, power=1.5, vib=0.04))
+    s["bumper_copper_speedway"] = mix(tone(0.15, 600, 150, "square", 0.5, duty=0.4), noise(0.06, 0.5, 0.85))
+    s["jackpot_copper_speedway"] = cat(arp([mtof(m) for m in (64, 67, 71, 76)], 0.045, "square", 0.5),
+                                      arp([mtof(m) for m in (76, 79, 83, 88)], 0.045, "saw", 0.5),
+                                      tone(0.35, mtof(88), None, "square", 0.5, power=1.2))
     os.makedirs(SFX_DIR, exist_ok=True)
     for name, sig in s.items():
         write_wav(os.path.join(SFX_DIR, name + ".wav"), sig)

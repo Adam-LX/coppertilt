@@ -1,0 +1,32 @@
+{
+ "section": "multiball",
+ "title": "Launch Pad",
+ "profile": "pinball-table",
+ "rate": 44100,
+ "speed": 5,
+ "tempo": 130,
+ "bpm": 156.0,
+ "bar_s": 1.538462,
+ "loop": true,
+ "loop_offset_samples": 0,
+ "loop_offset": 0.0,
+ "loop_len_s": 24.615,
+ "length_s": 24.615,
+ "bars": 16.0,
+ "tempo_changes": [
+  [
+   5,
+   130
+  ]
+ ],
+ "lufs": -14.0,
+ "true_peak_dbtp": -4.54,
+ "seam": {
+  "jump": 0.033,
+  "p999": 0.2325,
+  "ratio": 0.142,
+  "rms_jump_db": 9.13,
+  "verdict": "UWAGA"
+ },
+ "file": "launch_pad_multiball.ogg"
+}

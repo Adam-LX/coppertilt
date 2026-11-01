@@ -1,6 +1,6 @@
 {
  "section": "ambient",
- "title": "Midnight Funfair – menu",
+ "title": "Nocne Wesołe Miasteczko – menu",
  "profile": "unreal",
  "rate": 44100,
  "speed": 8,
@@ -28,5 +28,5 @@
   "rms_jump_db": 4.46,
   "verdict": "OK"
  },
- "file": "menu_ambient.ogg"
+ "file": "menu.ogg"
 }

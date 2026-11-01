@@ -6,6 +6,7 @@ extends "res://scripts/table/rules/table_rules.gd"
 
 var helter_n := 0
 var orbit_n := 0
+var video_mode_lit := false
 
 
 func shots() -> Array:
@@ -22,6 +23,7 @@ func flashers() -> Dictionary:
 func reset_game() -> void:
 	helter_n = 0
 	orbit_n = 0
+	video_mode_lit = false
 
 
 func on_bumper(bi: int, _b) -> void:
@@ -60,8 +62,10 @@ func on_bank(bank: String) -> void:
 	if bank == "duck":
 		t._score(25000)
 		t.lock_lit = true
-		t.announce.emit("DUCK SHOOT - LOCK LIT", "jackpot")
-		t.dmd_anim.emit("sparkle", "LOCK IS LIT")
+		video_mode_lit = true
+		Sound.play_voice("duck_hunt")
+		t.announce.emit("DUCK SHOOT LIT - SHOOT SAUCER", "jackpot")
+		t.dmd_anim.emit("circus", "DUCK SHOOT LIT")
 	else:
 		t._score(20000)
 		bump_multiplier("F-A-I-R 25,000")
@@ -112,7 +116,17 @@ func on_hole(b, hn: String) -> void:
 			else:
 				t._score(10000)
 				say("HAUNTED HOUSE", "", "sparkle")
+		"ghost":
+			b.sprite.visible = false
+			t._score(10000)
+			Sound.play_voice("ghost_train")
+			say("GHOST TRAIN", "bonus", "ghost")
 		"saucer":
+			if video_mode_lit and not t.tilted:
+				video_mode_lit = false
+				b.held = 22.0
+				t.video_mode_start.emit("duck_hunt")
+				return
 			if t.extra_lit and not t.tilted:
 				t.extra_lit = false
 				t.extra_ball.emit()
@@ -127,6 +141,7 @@ func on_hole(b, hn: String) -> void:
 				3: bump_multiplier("F-A-I-R 25,000")
 				4: t.lock_lit = true
 				5: t._score(50000)
+			Sound.play_voice("fortune")
 			t.announce.emit("FORTUNE: " + awards[i], "bonus")
 			t.dmd_anim.emit("wheel", awards[i])
 
@@ -148,6 +163,7 @@ func on_ramp(_ri: int, name: String) -> void:
 	if name == "helter":
 		helter_n += 1
 		t._score(25000 * t.multiplier)
+		Sound.play_voice("helter_skelter")
 		if helter_n % 3 == 0:
 			t.extra_lit = true
 			say("HELTER SKELTER - EXTRA BALL LIT", "jackpot", "sparkle", "EXTRA BALL LIT")

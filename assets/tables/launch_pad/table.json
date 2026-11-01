@@ -1,1 +1,10 @@
-{"order":2,"name":"LAUNCH PAD","tagline":"COUNTDOWN TO ORBIT","subtitle":"GANTRY - BOOSTER - LIFTOFF MULTIBALL","preview":"preview.png","music":"launch_pad","playable":true}
+{
+	"order": 2,
+	"name": "LAUNCH PAD",
+	"tagline": "COUNTDOWN TO ORBIT",
+	"subtitle": "GANTRY - BOOSTER - LIFTOFF MULTIBALL",
+	"preview": "preview.png",
+	"panorama": "panorama.png",
+	"music": "launch_pad",
+	"playable": true
+}

@@ -1,0 +1,252 @@
+# Copper Speedway – muzyka stołu (oryginalna kompozycja racing w stylu Amiga Tracker).
+# Klasyczna Amiga: 4 kanały LRRL, 8-bit, ProTracker.
+title    Copper Speedway
+author   CopperTilt (agent: agy)
+profile  pinball-table
+speed    6
+tempo    140
+channels 4
+pan      L R R L
+stereo   0.7
+filter   a500
+key      E minor
+normalize -14
+
+[instruments]
+01 kick   kick
+02 snare  snare
+03 hat    hat_closed
+04 bass   slap_bass vol=30
+05 lead   detune_lead vol=54
+06 arp    chip_square vol=40
+07 bell   bell vol=50
+08 crash  crash
+09 ohat   hat_open
+10 tom    tom
+11 lead2  pwm_lead vol=50
+12 brass  brass vol=46
+13 orch   orch_hit
+
+[leadsheet]
+Tonacja e-moll, 140 BPM (speed 6 / tempo 140), 16 wierszy = 1 takt 4/4.
+Wysokoobrotowy styl Amiga Racing (Lotus Esprit Turbo Challenge / Super Cars II).
+Kanały: 1 perkusja | 2 bas slap e-moll | 3 melodia detune lead | 4 arpeggio / brass / odzewy.
+
+[track bt]
+C-3@kick*2 C-3@hat*2 C-3@snare*2 C-3@hat*2 C-3@kick*2 C-3@hat*2 C-3@snare*2 C-3@hat*2
+[track bt2]
+C-3@kick*2 C-3@hat*2 C-3@snare*2 C-3@hat*2 C-3@kick*2 C-3@kick*2 C-3@snare*2 C-3@ohat*2
+[track btc]
+C-3@crash*2 C-3@hat*2 C-3@snare*2 C-3@hat*2 C-3@kick*2 C-3@kick*2 C-3@snare*2 C-3@ohat*2
+[track fill]
+C-3@kick*2 C-3@hat*2 C-3@snare*2 C-3@hat*2 C-3v40@snare C-3v45 C-3v50 C-3v55 A-2@tom*2 C-3v60@snare C-3v64
+[track fill2]
+C-3@kick*2 C-3@hat*2 C-3@snare*2 F-2@tom*2 A-2@tom*2 C-3@tom*2 C-3v44@snare C-3v50 C-3v56 C-3v64
+[track btin]
+C-3@kick*4 C-3@hat*4 C-3@kick*4 C-3@hat*4
+
+# Bas slap w e-moll (E C D B)
+[track oomE]
+E-1@bass*2 E-2*2 E-1*2 E-2*2 B-1*2 B-2*2 B-1*2 B-2*2
+[track oomC]
+C-2@bass*2 C-3*2 C-2*2 C-3*2 G-1*2 G-2*2 G-1*2 G-2*2
+[track oomD]
+D-2@bass*2 D-3*2 D-2*2 D-3*2 A-1*2 A-2*2 A-1*2 A-2*2
+[track oomB]
+B-1@bass*2 B-2*2 B-1*2 B-2*2 F#1*2 F#2*2 F#1*2 F#2*2
+[track oomG]
+G-1@bass*2 G-2*2 G-1*2 G-2*2 D-1*2 D-2*2 D-1*2 D-2*2
+[track oomA]
+A-1@bass*2 A-2*2 A-1*2 A-2*2 E-1*2 E-2*2 E-1*2 E-2*2
+
+# Arpeggio akordów racingowych
+[track pEm]
+.*4 E-2v24@arp!!037*3 ^ .*4 E-2v24@arp!!037*3 ^
+[track pC]
+.*4 C-2v24@arp!!047*3 ^ .*4 C-2v24@arp!!047*3 ^
+[track pD]
+.*4 D-2v24@arp!!047*3 ^ .*4 D-2v24@arp!!047*3 ^
+[track pB7]
+.*4 B-1v24@arp!!04A*3 ^ .*4 B-1v24@arp!!04A*3 ^
+[track pG]
+.*4 G-1v24@arp!!047*3 ^ .*4 G-1v24@arp!!047*3 ^
+[track pAm]
+.*4 A-1v24@arp!!037*3 ^ .*4 A-1v24@arp!!037*3 ^
+
+# Odpowiedzi arpeggio
+[track rEm]
+.*4 E-2v24@arp!!037*3 ^ .*4 B-2v28@arp E-3 G-3 B-3
+[track rB7]
+.*4 B-1v24@arp!!04A*3 ^ .*4 A-2v28@arp F#2 D#2 B-1
+
+# Melodia: szybki motyw racing A
+[track la1]
+B-2@lead*4 E-3*2 G-3*2 B-3*4 .!!423*2 G-3*2
+[track la2]
+A-3*4 F#3*2 G-3*2 E-3*6 ^*2
+[track la3]
+G-3*4 A-3*2 B-3*2 C-3*4 .!!423*2 B-2*2
+[track la4]
+A-2*4 G-2*2 F#2*2 B-2*6 ^*2
+
+# Następnik A2
+[track la5]
+B-2@lead*4 E-3*2 G-3*2 B-3*4 .!!423*2 E-3*2
+[track la6]
+D-3*4 B-2*2 G-2*2 A-2*6 ^*2
+[track la7]
+C-3*4 B-2*2 A-2*2 G-2*4 F#2*4
+[track la8]
+E-2*6 D-2*2 E-2*6 ^*2
+
+# Refren B (prosta startowa / overtaking)
+[track lb1]
+E-3@lead2*4 B-2*4 G-2*4 E-2*4
+[track lb2]
+F#3*4 D-3*4 A-2*4 F#2*4
+[track lb3]
+G-3*4 E-3*4 C-3*4 G-2*4
+[track lb4]
+F#3*6 E-3*2 D#3*6 ^*2
+[track lb5]
+E-3*4 G-3*2 F#3*2 E-3*4 B-2*4
+[track lb6]
+D-3*4 E-3*2 D-3*2 C-3*4 A-2*4
+[track lb7]
+B-2*4 C-3*2 B-2*2 A-2*4 G-2*4
+[track lb8]
+F#2*4 G-2*2 F#2*2 E-2*6 ^*2
+
+# Bridge – pit-stop dzwonki / telemetry
+[track lr1]
+E-3@bell*4 G-3*4 B-3*8
+[track lr2]
+D-3*4 F#3*4 A-3*8
+[track lr3]
+C-3*4 E-3*4 G-3*8
+[track lr4]
+B-2*4 D#3*4 F#3*8
+
+# Odzewy brass
+[track br1]
+.*8 E-3v48@brass*4 B-3*4
+[track br2]
+.*8 D-3v48@brass*4 A-3*4
+[track br3]
+.*8 C-3v48@brass*4 G-3*4
+[track br4]
+.*8 B-2v48@brass*4 F#3*4
+
+# Multiball – Flat-out Nitro Multiball
+[track mbt]
+C-3@kick*2 C-3@hat C-3 C-3@snare*2 C-3@hat C-3 C-3@kick*2 C-3@hat C-3 C-3@snare*2 C-3@ohat*2
+[track mbtc]
+C-3@crash*2 C-3@hat C-3 C-3@snare*2 C-3@hat C-3 C-3@kick*2 C-3@hat C-3 C-3@snare*2 C-3@ohat*2
+[track mfill]
+C-3@kick*2 C-3@snare*2 C-3@tom*2 C-3@tom*2 C-3v50@snare C-3v55 C-3v60 C-3v64 C-3@crash*2 C-3@crash*2
+[track galE]
+E-1@bass E-1 E-2 E-2 E-1 E-1 E-2 E-2 B-1 B-1 B-2 B-2 B-1 B-1 B-2 B-2
+[track galC]
+C-2@bass C-2 C-3 C-3 C-2 C-2 C-3 C-3 G-1 G-1 G-2 G-2 G-1 G-1 G-2 G-2
+[track galD]
+D-2@bass D-2 D-3 D-3 D-2 D-2 D-3 D-3 A-1 A-1 A-2 A-2 A-1 A-1 A-2 A-2
+[track galB]
+B-1@bass B-1 B-2 B-2 B-1 B-1 B-2 B-2 F#1 F#1 F#2 F#2 F#1 F#1 F#2 F#2
+
+[track hitE]
+E-2v40@orch*4 .*4 E-2v40@orch*4 .*4
+[track hitB]
+B-1v40@orch*4 .*4 B-1v40@orch*4 .*4
+
+# ================================================================ PATTERNS
+[pattern IN rows=64]
+chords: Em Em Em B7
+ch1: btin btin btin fill
+ch2: oomE oomE oomE oomB
+ch3: lr1 lr2 lr3 lr4
+ch4: pEm pEm pEm pB7
+
+[pattern A1 rows=64]
+chords: Em D C B7
+ch1: btc bt bt bt2
+ch2: oomE oomD oomC oomB
+ch3: la1 la2 la3 la4
+ch4: pEm pD pC pB7
+
+[pattern A2 rows=64]
+chords: Em D C Em
+ch1: bt bt2 bt fill
+ch2: oomE oomD oomC oomE
+ch3: la5 la6 la7 la8
+ch4: pEm pD pC rEm
+
+[pattern B1 rows=64]
+chords: Em D C B7
+ch1: btc bt2 bt bt2
+ch2: oomE oomD oomC oomB
+ch3: lb1 lb2 lb3 lb4
+ch4: br1 br2 br3 br4
+
+[pattern B2 rows=64]
+chords: Em D C Em
+ch1: bt bt2 bt fill2
+ch2: oomE oomD oomC oomE
+ch3: lb5 lb6 lb7 lb8
+ch4: br1 br2 br3 rEm
+
+[pattern BR1 rows=64]
+chords: Em D C B7
+ch1: btin btin btin fill
+ch2: oomE oomD oomC oomB
+ch3: lr1 lr2 lr3 lr4
+ch4: pEm pD pC pB7
+
+[pattern A3 rows=64]
+chords: Em D C B7
+ch1: btc bt bt bt2
+ch2: oomE oomD oomC oomB
+ch3: la1 la2 la3 la4
+ch4: br1 br2 br3 br4
+
+[pattern A4 rows=64]
+chords: Em D C Em
+ch1: bt bt2 bt fill2
+ch2: oomE oomD oomC oomE
+ch3: la5 la6 la7 la8
+ch4: pEm pD pC rEm
+
+# Multiball patterns
+[pattern MA1 rows=64]
+chords: Em D C B7
+ch1: mbtc mbt mbt mbt
+ch2: galE galD galC galB
+ch3: la1 la2 la3 la4
+ch4: hitE hitE hitE hitB
+
+[pattern MA2 rows=64]
+chords: Em D C Em
+ch1: mbt mbt mbt mfill
+ch2: galE galD galC galE
+ch3: la5 la6 la7 la8
+ch4: hitE hitE hitE hitE
+
+[pattern MB1 rows=64]
+chords: Em D C B7
+ch1: mbtc mbt mbt mbt
+ch2: galE galD galC galB
+ch3: lb1 lb2 lb3 lb4
+ch4: br1 br2 br3 br4
+
+[pattern MB2 rows=64]
+chords: Em D C Em
+ch1: mbt mbt mbt mfill
+ch2: galE galD galC galE
+ch3: lb5 lb6 lb7 lb8
+ch4: br1 br2 br3 hitE
+
+# ================================================================ ORDERS
+[order main]
+IN | A1 A2 B1 B2 BR1 A3 A4
+
+[order multiball speed=5 tempo=140]
+| MA1 MA2 MB1 MB2

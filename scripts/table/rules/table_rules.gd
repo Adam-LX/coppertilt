@@ -118,6 +118,10 @@ func skill_lane(points := 25000, word := "SKILL SHOT") -> void:
 		t._skill_t = 0.0
 		t._score(points)
 		say("%s %s" % [word, _fmt(points)], "jackpot", "sparkle", word)
+		if word.find("SUPER") != -1:
+			Sound.play_voice("super_skill_shot")
+		else:
+			Sound.play_voice("skill_shot")
 
 
 ## top lanes: light one, all lit -> reset + callback
@@ -152,6 +156,7 @@ func start_multiball(extra: int, text: String, anim := "jackpot") -> void:
 	t.super_lit = false
 	t._score(100000)
 	say(text, "jackpot", anim, text)
+	Sound.play_voice("multiball")
 	jackpot_fx()
 	t._serve = extra
 	t._serve_t = 0.6
@@ -341,6 +346,7 @@ func hurry_start() -> void:
 		return
 	hurry_t = HURRY_TIME
 	say("HURRY-UP: SHOOT %s" % hurry_shot().to_upper(), "bonus", "big", "HURRY-UP")
+	Sound.play_voice("hurry_up")
 
 
 func mode_event(shot: String) -> void:
@@ -352,8 +358,12 @@ func mode_event(shot: String) -> void:
 			combo += 1
 			var pts := 20000 * combo
 			t._score(pts)
-			if combo >= 2:
+			if combo >= 3:
 				say("%d-WAY COMBO %s" % [combo + 1, _fmt(pts)], "bonus", "big", "COMBO X%d" % (combo + 1))
+				Sound.play_voice("super_combo")
+			elif combo >= 1:
+				say("%d-WAY COMBO %s" % [combo + 1, _fmt(pts)], "bonus", "big", "COMBO X%d" % (combo + 1))
+				Sound.play_voice("combo")
 		combo_t = COMBO_WINDOW
 		if relight > 0:
 			relight -= 1

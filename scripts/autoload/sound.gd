@@ -21,19 +21,30 @@ extends Node
 const SFX_DIR := "res://assets/audio/sfx/"
 const MUSIC_DIR := "res://assets/audio/music/"
 const STINGER_DIR := "res://assets/audio/stingers/"
+const VOICE_DIR := "res://assets/audio/voice/"
 const SFX_NAMES: Array[String] = [
 	"flipper", "flipper_down", "bumper", "sling", "rollover", "target", "post",
-	"launch", "plunger", "drain", "tilt", "warn", "bonus", "start", "jackpot", "save"]
+	"launch", "plunger", "drain", "tilt", "warn", "bonus", "start", "jackpot", "save",
+	"launch_launch_pad", "launch_copper_speedway",
+	"bumper_launch_pad", "bumper_copper_speedway",
+	"jackpot_launch_pad", "jackpot_copper_speedway",
+	"turbo_blowoff", "engine_shift", "backfire", "tire_screech",
+	"telemetry_chirp", "countdown_beep", "plasma_shield"]
 ## Stingers that are UI blips: they follow the effects volume and never duck the music.
 const UI_STINGERS: Array[String] = [
 	"menu", "menu_move", "menu_back", "menu_start", "menu_denied", "match_tick"]
 const MUSIC_DB := -6.0          # music bed level under the effects
 const STINGER_DB := -2.0        # musical stingers sit a bit above the bed
+const VOICE_DB := +1.0          # announcer callouts sit cleanly above sfx/music
 const FADE_S := 0.8             # crossfade between different pieces
 const BAR_FADE_S := 0.12        # short crossfade on a bar line (normal <-> multiball)
 const DUCK_DB := -9.0           # music under a musical stinger
 const STATE_DUCK_DB := -7.0     # music during MATCH / GAME OVER / final score
-const PAIRS := {"funfair": "funfair_multiball", "funfair_multiball": "funfair"}
+const PAIRS := {
+	"funfair": "funfair_multiball", "funfair_multiball": "funfair",
+	"launch_pad": "launch_pad_multiball", "launch_pad_multiball": "launch_pad",
+	"copper_speedway": "copper_speedway_multiball", "copper_speedway_multiball": "copper_speedway",
+}
 
 var _sfx: Dictionary = {}
 var _players: Array[AudioStreamPlayer] = []
@@ -52,6 +63,9 @@ var _streams: Dictionary = {}            # stinger name -> AudioStream (or null 
 var _sting: Array[AudioStreamPlayer] = []
 var _sting_ui: Dictionary = {}           # player -> bool
 var _sn := 0
+var _voice: Dictionary = {}              # voice callout name -> AudioStream
+var _voice_players: Array[AudioStreamPlayer] = []
+var _vn := 0
 var _time := 0.0
 var _duck_until := 0.0
 var _duck := 0.0                         # current duck in dB (smoothed)
@@ -104,6 +118,10 @@ func _ready() -> void:
 		add_child(sp)
 		_sting.append(sp)
 		_sting_ui[sp] = false
+	for i in 4:
+		var vp := AudioStreamPlayer.new()
+		add_child(vp)
+		_voice_players.append(vp)
 	_setup_ball()
 	var args := OS.get_cmdline_user_args()
 	_probe = args.has("--sound-probe")
@@ -113,6 +131,9 @@ func _ready() -> void:
 
 
 func play(sfx_name: String, pitch := 1.0, volume_db := 0.0) -> void:
+	var tbl_var := sfx_name + "_" + Settings.table_id
+	if _sfx.has(tbl_var):
+		sfx_name = tbl_var
 	var s: AudioStream = _sfx.get(sfx_name)
 	if s == null:
 		return
@@ -175,11 +196,61 @@ func refresh_volume() -> void:
 	for sp in _sting:
 		if sp.playing:
 			sp.volume_db = _stinger_db(bool(_sting_ui[sp]))
+	for vp in _voice_players:
+		if vp.playing:
+			vp.volume_db = _voice_db() + _solo_db("sfx")
 	_apply_gains()
 
 
 func has_stinger(stinger_name: String) -> bool:
 	return _stinger(stinger_name) != null
+
+
+## Plays a dynamic voice announcer callout (assets/audio/voice/<name>.wav).
+## Automatically checks for table-specific variant first (<name>_<table_id>).
+func play_voice(voice_name: String, pitch := 1.0, volume_db := 0.0) -> void:
+	var tbl_var := voice_name + "_" + Settings.table_id
+	if _has_voice(tbl_var):
+		voice_name = tbl_var
+	var s: AudioStream = _voice_stream(voice_name)
+	if s == null:
+		return
+	var vp := _voice_players[_vn]
+	_vn = (_vn + 1) % _voice_players.size()
+	vp.stream = s
+	vp.pitch_scale = pitch
+	vp.volume_db = volume_db + _voice_db() + _solo_db("sfx")
+	vp.play()
+	_duck_until = maxf(_duck_until, _time + s.get_length() * 0.9)
+
+
+func has_voice(voice_name: String) -> bool:
+	var tbl_var := voice_name + "_" + Settings.table_id
+	return _has_voice(tbl_var) or _has_voice(voice_name)
+
+
+func _has_voice(voice_name: String) -> bool:
+	return _voice_stream(voice_name) != null
+
+
+func _voice_stream(voice_name: String) -> AudioStream:
+	if not _voice.has(voice_name):
+		var s: AudioStream = null
+		for ext in [".wav", ".ogg"]:
+			var p: String = VOICE_DIR + voice_name + ext
+			if ResourceLoader.exists(p):
+				s = load(p)
+				break
+		if s is AudioStreamWAV:
+			(s as AudioStreamWAV).loop_mode = AudioStreamWAV.LOOP_DISABLED
+		elif s is AudioStreamOggVorbis:
+			(s as AudioStreamOggVorbis).loop = false
+		_voice[voice_name] = s
+	return _voice.get(voice_name)
+
+
+func _voice_db() -> float:
+	return linear_to_db(maxf(Settings.sfx_volume, 0.001)) + VOICE_DB
 
 
 func current_music() -> String:
@@ -284,20 +355,23 @@ func _resolve() -> String:
 		if ctx != null and str(ctx.get("page")) == "scores" and _has_music("hiscore"):
 			return "hiscore"
 		return "menu" if _has_music("menu") else "title"
-	if r == "funfair" or r == "funfair_multiball":
+	# Table music with seamless multiball pairing
+	var base_m := r.replace("_multiball", "")
+	var mb_m := base_m + "_multiball"
+	if _has_music(base_m):
 		if ctx != null:
 			if str(ctx.get("state")) == "entry" and _has_music("hiscore"):
 				return "hiscore"
 			var t: Variant = ctx.get("table")
 			if t is Object and is_instance_valid(t) and (t as Object).get("multiball") == true \
-					and _has_music("funfair_multiball"):
-				return "funfair_multiball"
-		return "funfair"
+					and _has_music(mb_m):
+				return mb_m
+		return base_m
 	return r
 
 
 func _state_duck() -> float:
-	if _request != "funfair" and _request != "funfair_multiball":
+	if _request in ["title", "menu", "hiscore"]:
 		return 0.0
 	var ctx := _ctx()
 	if ctx != null and str(ctx.get("state")) in ["match", "gameover", "final", "over"]:
@@ -424,10 +498,15 @@ func _setup_ball() -> void:
 		var st := _ball_stream("roll_" + n)
 		if st is AudioStreamOggVorbis:
 			(st as AudioStreamOggVorbis).loop = true
+	for s_name in ["engine_speedway", "thruster_launch_pad"]:
+		var st := _ball_stream(s_name)
+		if st is AudioStreamOggVorbis:
+			(st as AudioStreamOggVorbis).loop = true
 	for v in ROLL_VOICES:
 		var bus := _make_bus("CT_Roll%d" % v, true)
 		var voice := {"t": -10.0, "speed": 0.0, "s": 0.0, "surface": "playfield", "pan": 0.0,
-			"bus": bus, "players": {}, "gain": {}, "detune": 1.0 + 0.035 * v, "shimmer": null, "sh_gain": 0.0}
+			"bus": bus, "players": {}, "gain": {}, "detune": 1.0 + 0.035 * v, "shimmer": null, "sh_gain": 0.0,
+			"engine": null, "engine_gain": 0.0, "thruster": null, "thruster_gain": 0.0}
 		for n in ROLL_SURFACES:
 			if _ball_stream("roll_" + n) == null:
 				continue
@@ -444,6 +523,20 @@ func _setup_ball() -> void:
 			p.bus = AudioServer.get_bus_name(bus)
 			add_child(p)
 			voice.shimmer = p
+		var eng := _ball_stream("engine_speedway")
+		if eng != null:
+			var p := AudioStreamPlayer.new()
+			p.stream = eng
+			p.bus = AudioServer.get_bus_name(bus)
+			add_child(p)
+			voice.engine = p
+		var thr := _ball_stream("thruster_launch_pad")
+		if thr != null:
+			var p := AudioStreamPlayer.new()
+			p.stream = thr
+			p.bus = AudioServer.get_bus_name(bus)
+			add_child(p)
+			voice.thruster = p
 		_roll.append(voice)
 	for i in 3:
 		var bus := _make_bus("CT_BallHit%d" % i, false)
@@ -533,6 +626,33 @@ func _update_roll(delta: float) -> void:
 				sp.pitch_scale = (0.9 + 0.2 * minf(s, 1.3)) * float(v.detune)
 			elif sp.playing:
 				sp.stop()
+		# table-specific dynamic propulsion sounds (engine revving on speedway, rocket ion thrusters on launch pad)
+		var is_speedway: bool = Settings.table_id == "copper_speedway"
+		var is_launch: bool = Settings.table_id == "launch_pad"
+		if v.engine != null:
+			var ep: AudioStreamPlayer = v.engine
+			var ew := (lvl * 1.1) if (live and is_speedway) else 0.0
+			v.engine_gain = move_toward(float(v.engine_gain), ew, delta * 8.0)
+			var eg: float = v.engine_gain
+			if eg > 0.002:
+				if not ep.playing:
+					ep.play(randf() * 2.0)
+				ep.volume_db = -5.0 + _sfx_db() + multi + linear_to_db(eg) + _solo_db("roll")
+				ep.pitch_scale = clampf((0.72 + 0.95 * minf(s, 1.4)) * float(v.detune), 0.6, 2.2)
+			elif ep.playing:
+				ep.stop()
+		if v.thruster != null:
+			var tp: AudioStreamPlayer = v.thruster
+			var tw := (lvl * 0.95) if (live and is_launch) else 0.0
+			v.thruster_gain = move_toward(float(v.thruster_gain), tw, delta * 8.0)
+			var tg: float = v.thruster_gain
+			if tg > 0.002:
+				if not tp.playing:
+					tp.play(randf() * 2.0)
+				tp.volume_db = -6.0 + _sfx_db() + multi + linear_to_db(tg) + _solo_db("roll")
+				tp.pitch_scale = clampf((0.85 + 0.55 * minf(s, 1.4)) * float(v.detune), 0.6, 1.8)
+			elif tp.playing:
+				tp.stop()
 
 
 func _play_hit(hit_name: String, strength: float, pan: float) -> void:

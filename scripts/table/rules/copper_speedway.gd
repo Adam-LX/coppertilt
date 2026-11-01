@@ -7,6 +7,7 @@ extends "res://scripts/table/rules/table_rules.gd"
 
 var lap_n := 0       # laps completed (straight shots)
 var orbit_n := 0
+var video_mode_lit := false
 
 
 func shots() -> Array:
@@ -23,11 +24,14 @@ func flashers() -> Dictionary:
 func reset_game() -> void:
 	lap_n = 0
 	orbit_n = 0
+	video_mode_lit = false
 
 
 func on_bumper(bi: int, _b) -> void:
 	t.flash["top" if bi < 3 else "nest"] = 1.0
 	t._score(100)
+	if randf() < 0.4:
+		Sound.play("backfire", randf_range(0.9, 1.15), -4.0)
 	if t.bumper_hits % 50 == 0:
 		t._score(50000)
 		say("CROWD GOES WILD 50,000", "bonus", "sparkle")
@@ -57,18 +61,30 @@ func on_drop(_i: int) -> void:
 	t._score(2500)
 
 
+func on_spinner() -> void:
+	super.on_spinner()
+	if randf() < 0.25:
+		Sound.play("turbo_blowoff", randf_range(1.1, 1.3), -8.0)
+
+
 func on_bank(bank: String) -> void:
 	if bank == "turbo":
 		t._score(25000)
 		t.lock_lit = true
-		t.announce.emit("TURBO BOOST - LOCK LIT", "jackpot")
-		t.dmd_anim.emit("race", "LOCK IS LIT")
+		video_mode_lit = true
+		Sound.play("turbo_blowoff")
+		Sound.play("engine_shift", 1.0, -3.0)
+		Sound.play_voice("turbo_boost")
+		t.announce.emit("OVERTAKE LIT - SHOOT GARAGE", "jackpot")
+		t.dmd_anim.emit("drag_tree", "OVERTAKE LIT")
 	else:
 		t._score(20000)
 		bump_multiplier("NITRO 25,000")
 		t.spinner_level = mini(t.spinner_level + 1, 5)
+		Sound.play("engine_shift", 1.15, -2.0)
+		Sound.play_voice("nitro")
 		t.announce.emit("NITRO!", "jackpot")
-		t.dmd_anim.emit("race", "NITRO")
+		t.dmd_anim.emit("burnout", "NITRO")
 
 
 func on_star(i: int) -> void:
@@ -99,8 +115,13 @@ func on_hole(b, hn: String) -> void:
 	match hn:
 		"garage":
 			b.sprite.visible = false
+			if video_mode_lit and not t.tilted:
+				video_mode_lit = false
+				b.held = 22.0
+				t.video_mode_start.emit("redline_overtake")
+				return
 			t._score(15000 * t.multiplier)
-			say("GARAGE", "bonus", "sparkle")
+			say("GARAGE", "bonus", "drag_tree")
 		"paddock":
 			b.sprite.visible = false
 			if t.lock_lit and not t.multiball and not t.tilted:
@@ -130,11 +151,14 @@ func on_hole(b, hn: String) -> void:
 				3: bump_multiplier("RACE 25,000")
 				4: t.lock_lit = true
 				5: t._score(50000)
+			Sound.play_voice("pit_stop")
 			t.announce.emit("PIT STOP: " + awards[i], "bonus")
 			t.dmd_anim.emit("big", awards[i])
 
 
 func on_ramp(_ri: int, name: String) -> void:
+	if name in ["chicane", "banking"]:
+		Sound.play("tire_screech", randf_range(0.95, 1.05), -2.0)
 	if t.multiball:
 		if name == "straight" and t.super_lit:
 			t.super_lit = false
@@ -153,9 +177,16 @@ func on_ramp(_ri: int, name: String) -> void:
 		t._score(25000 * t.multiplier)
 		if lap_n % 5 == 0:
 			t.extra_lit = true
-			say("CHEQUERED FLAG - EXTRA BALL LIT", "jackpot", "race", "EXTRA BALL LIT")
+			Sound.play_voice("chequered_flag")
+			say("CHEQUERED FLAG - EXTRA BALL LIT", "jackpot", "flag_wave", "EXTRA BALL LIT")
+		elif lap_n % 3 == 0:
+			video_mode_lit = true
+			Sound.play_voice("redline")
+			say("OVERTAKE LIT - SHOOT GARAGE", "bonus", "burnout", "VIDEO MODE")
 		else:
-			say("LAP %d" % (lap_n % 5), "bonus", "race")
+			if (lap_n % 5) == 4:
+				Sound.play_voice("lap_record")
+			say("LAP %d" % (lap_n % 5), "bonus", "drag_tree")
 		return
 	t._score(10000 * t.multiplier)
 	if not t.lock_lit:
